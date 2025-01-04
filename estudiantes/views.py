@@ -7,5 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 class EstudianteViewSet(viewsets.ModelViewSet):
     queryset = Estudiante.objects.all()
     serializer_class = EstudianteSerializer
+    parser_classes = [JSONParser, FormParser]
    # permission_classes = [IsAuthenticated]
 

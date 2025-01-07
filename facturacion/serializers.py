@@ -11,13 +11,14 @@ class TarifaSerializer(serializers.ModelSerializer):
 
 class CuentaPorCobrarSerializer(serializers.ModelSerializer):
     estudiante_nombre = serializers.CharField(source='estudiante.nombre')
-    estudiante_apellidos = serializers.CharField(source='estudiante.apellido')
+  #  estudiante_apellidos = serializers.CharField(source='estudiante.apellido')
     seccion_nombre = serializers.CharField(source='seccion.nombre')
     facturas = serializers.SerializerMethodField()
 
     class Meta:
         model = CuentaPorCobrar
-        fields = ['id', 'estudiante_nombre', 'estudiante_apellidos','seccion_nombre', 'monto', 'fecha_factura', 'estado', 'facturas']
+      #  fields = ['id', 'estudiante_nombre', 'estudiante_apellidos','seccion_nombre', 'monto', 'fecha_factura', 'estado', 'facturas']
+        fields = ['id', 'estudiante_nombre', 'seccion_nombre', 'monto', 'fecha_factura', 'estado', 'facturas']
 
     def get_facturas(self, obj):
         # Retornar una lista de facturas asociadas a la cuenta

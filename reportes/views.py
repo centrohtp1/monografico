@@ -1,6 +1,4 @@
-# estudiantes/views.py
-
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from estudiantes.models import Estudiante
 import pandas as pd
 import io
@@ -18,28 +16,24 @@ def get_estudiantes_report(request):
         except ValueError:
             return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
         
-        # Filtrar estudiantes por el rango de fechas de nacimiento
+        # Filtrar estudiantes por el rango de fechas
         estudiantes = Estudiante.objects.filter(fecha_ingreso__range=(fecha_inicio, fecha_fin))
         
-        # Generar DataFrame
+        # Preparar contexto para el template
         df = pd.DataFrame(list(estudiantes.values()))
+        template = render_to_string('estudiantes/report_pdf.html', {'estudiantes': df})
         
         # Generar PDF
-        template = render_to_string('estudiantes/report_pdf.html', {'estudiantes': df})
         pdf_io = io.BytesIO()
         pisa_status = pisa.CreatePDF(template, dest=pdf_io)
         
-        # Generar Excel
-        excel_io = io.BytesIO()
-        df.to_excel(excel_io, index=False, engine='openpyxl')
+        if pisa_status.err:
+            return JsonResponse({'error': 'Error al generar el PDF'}, status=500)
         
-        # Enviar el archivo PDF y Excel como respuesta
-        return JsonResponse({
-            'pdf_data': pdf_io.getvalue().decode('latin1'),
-            'excel_data': excel_io.getvalue().decode('latin1')
-        }, safe=False)
+        # Preparar respuesta HTTP con el PDF
+        pdf_io.seek(0)
+        response = HttpResponse(pdf_io, content_type='application/pdf')
+        response['Content-Disposition'] = 'inline; filename="reporte_estudiantes.pdf"'
+        return response
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas de inicio y fin'}, status=400)
-from django.shortcuts import render
-
-# Create your views here.

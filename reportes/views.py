@@ -1,7 +1,7 @@
 # estudiantes/views.py
 
 from django.http import JsonResponse
-from .models import Estudiante
+from estudiantes.models import Estudiante
 import pandas as pd
 import io
 from django.template.loader import render_to_string

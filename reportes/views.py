@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import JsonResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 import io
@@ -29,9 +29,9 @@ def get_estudiantes_report(request):
         if pisa_status.err:
             return JsonResponse({'error': 'Error al generar el PDF'}, status=500)
         
-        # Configurar la respuesta para descargar el PDF
-        response = HttpResponse(pdf_io.getvalue(), content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename="reporte_estudiantes.pdf"'
-        return response
+        # Crear una URL para el PDF generado y devolverla
+        pdf_url = 'https://your-server-url/reporte-estudiantes/'  # Ajusta esta URL a tu estructura real
+        # Devolvemos la URL del PDF para que el frontend la pueda abrir
+        return JsonResponse({'pdf_url': pdf_url}, status=200)
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas de inicio y fin'}, status=400)

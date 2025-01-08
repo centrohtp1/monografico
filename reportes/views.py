@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import HttpResponse
 from django.template.loader import render_to_string
 from xhtml2pdf import pisa
 import io
@@ -35,4 +35,3 @@ def get_estudiantes_report(request):
         return response
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas de inicio y fin'}, status=400)
-

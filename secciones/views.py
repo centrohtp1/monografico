@@ -74,13 +74,19 @@ def editar_seccion_api(request, seccion_id):
 @swagger_auto_schema(method='delete', manual_parameters=[seccion_id_param])
 @api_view(['DELETE'])
 def eliminar_seccion_api(request, seccion_id):
-    seccion = get_object_or_404(Seccion, id=seccion_id)
-
     try:
+        # Intentar obtener la sección
+        seccion = get_object_or_404(Seccion, id=seccion_id)
+
+        # Intentar eliminar la sección
         seccion.delete()
+
+        # Si la eliminación fue exitosa, devolver una respuesta positiva
         return Response({'success': True, 'message': 'Sección eliminada exitosamente.'}, status=status.HTTP_200_OK)
     except Exception as e:
+        # Capturar cualquier excepción y devolver una respuesta de error con el detalle
         return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 # Gestionar sección (listar estudiantes y añadir)

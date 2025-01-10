@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Reporte de Estudiantes</title>
+    <!-- Incluir el CSS de SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+
+</head>
+<body>
+    <div style="text-align: center; margin-top: 50px;">
+        <h1>Generar Reporte de Estudiantes</h1>
+        <button id="generate-estudiantes-report" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+            Generar Reporte PDF
+        </button>
+
+        <!-- Botón de descarga (oculto inicialmente) -->
+        <button id="download-report" style="display: none; margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer;">
+            Descargar Reporte PDF
+        </button>
+    </div>
+
+    <!-- Incluir el script de SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Incluir el script principal -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('generate-estudiantes-report').addEventListener('click', function () {
+            // Solicitar fechas con SweetAlert
+            Swal.fire({
+                title: 'Selecciona el rango de fechas',
+                html: `
+                    <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
+                    <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
+                `,
+                focusConfirm: false,
+                preConfirm: () => {
+                    const fechaInicio = document.getElementById('fechaInicio').value;
+                    const fechaFin = document.getElementById('fechaFin').value;
+                    if (!fechaInicio || !fechaFin) {
+                        Swal.showValidationMessage('Ambas fechas son obligatorias');
+                        return false;
+                    }
+                    return { fechaInicio, fechaFin };
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const { fechaInicio, fechaFin } = result.value;
+
+                    // Mostrar un cargando mientras se procesa
+                    Swal.fire({
+                        title: 'Obteniendo datos...',
+                        text: 'Por favor espera unos segundos',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    // Solicitar la lista de estudiantes al backend
+                    const url = `https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+
+                    fetch(url)
+                        .then(response => {
+                            if (response.ok) {
+                                return response.json(); // Recibir los datos como JSON
+                            } else {
+                                throw new Error('No se pudo obtener la lista de estudiantes');
+                            }
+                        })
+                        .then(data => {
+                            Swal.close(); // Cerrar el mensaje de carga
+
+                            if (data.estudiantes && data.estudiantes.length > 0) {
+                                // Generar el PDF con los datos
+                                generarPDF(data.estudiantes);
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Sin resultados',
+                                    text: 'No se encontraron estudiantes en el rango de fechas seleccionado',
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: error.message,
+                            });
+                        });
+                }
+            });
+        });
+
+        // Función para generar el PDF
+        function generarPDF(estudiantes) {
+            const doc = new jsPDF();
+
+            // Agregar título al PDF
+            doc.setFontSize(18);
+            doc.text('Reporte de Estudiantes', 105, 20, { align: 'center' });
+
+            // Agregar tabla de estudiantes
+            const tableColumn = ['ID', 'Nombre', 'Apellido', 'Fecha de Ingreso'];
+            const tableRows = estudiantes.map(est => [
+                est.id,
+                est.nombre,
+                est.apellido,
+                est.fecha_ingreso,
+            ]);
+
+            doc.autoTable({
+                head: [tableColumn],
+                body: tableRows,
+                startY: 30,
+            });
+
+            // Descargar el archivo PDF
+            doc.save('reporte_estudiantes.pdf');
+        }
+    });
+</script>
+
+</body>
+</html>
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generar Reporte de Estudiantes</title>
+    <!-- Incluir el CSS de SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- Incluir jsPDF y html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 50px;">
+        <h1>Generar Reporte de Estudiantes</h1>
+        <button id="generate-estudiantes-report" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
+            Generar Reporte PDF
+        </button>
+    </div>
+
+    <div id="report-section" style="display:none; padding: 20px; margin-top: 30px; border: 1px solid #ccc;">
+        <h2>Reporte de Estudiantes</h2>
+        <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Fecha de Ingreso</th>
+                </tr>
+            </thead>
+            <tbody id="students-table-body">
+                <!-- Los estudiantes se añadirán aquí dinámicamente -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Incluir el script de SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById('generate-estudiantes-report').addEventListener('click', async function () {
+                // Mostrar alerta de selección de fecha
+                const result = await Swal.fire({
+                    title: 'Selecciona el rango de fechas',
+                    html: `
+                        <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
+                        <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
+                    `,
+                    focusConfirm: false,
+                    preConfirm: () => {
+                        const fechaInicio = document.getElementById('fechaInicio').value;
+                        const fechaFin = document.getElementById('fechaFin').value;
+                        if (!fechaInicio || !fechaFin) {
+                            Swal.showValidationMessage('Ambas fechas son obligatorias');
+                            return false;
+                        }
+                        return { fechaInicio, fechaFin };
+                    }
+                });
+
+                if (result.isConfirmed) {
+                    const { fechaInicio, fechaFin } = result.value;
+                    // Mostrar carga mientras obtenemos los datos
+                    Swal.fire({
+                        title: 'Obteniendo datos...',
+                        text: 'Por favor espera unos segundos',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+
+                    try {
+                        const url = `https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
+                        const response = await fetch(url);
+                        const data = await response.json();
+
+                        if (data.estudiantes && data.estudiantes.length > 0) {
+                            mostrarEstudiantes(data.estudiantes);
+
+                            // Botón para exportar el PDF
+                            const exportButton = document.createElement('button');
+                            exportButton.innerHTML = 'Descargar PDF';
+                            exportButton.style.padding = '10px 20px';
+                            exportButton.style.fontSize = '16px';
+                            exportButton.style.cursor = 'pointer';
+                            exportButton.style.marginTop = '20px';
+                            exportButton.addEventListener('click', exportarPDF);
+                            document.body.appendChild(exportButton);
+                        } else {
+                            Swal.fire({
+                                icon: 'info',
+                                title: 'Sin resultados',
+                                text: 'No se encontraron estudiantes en el rango de fechas seleccionado',
+                            });
+                        }
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'No se pudo obtener los datos: ' + error.message,
+                        });
+                    }
+                }
+            });
+
+            function mostrarEstudiantes(estudiantes) {
+                const tbody = document.getElementById('students-table-body');
+                tbody.innerHTML = '';
+                estudiantes.forEach(est => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${est.id}</td>
+                        <td>${est.nombre}</td>
+                        <td>${est.apellido}</td>
+                        <td>${est.fecha_ingreso}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+
+                document.getElementById('report-section').style.display = 'block';
+            }
+
+            async function exportarPDF() {
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const reportSection = document.getElementById('report-section');
+                try {
+                    const canvas = await html2canvas(reportSection, { scale: 2, useCORS: true, logging: false });
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 190;
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+                    // Generar el PDF y mostrarlo en una nueva ventana
+                    const pdfData = pdf.output('blob');
+                    const pdfUrl = URL.createObjectURL(pdfData);
+                    window.open(pdfUrl, '_blank');
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al generar el PDF',
+                        text: 'Hubo un error al crear el archivo PDF: ' + error.message,
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -133,19 +133,28 @@ def get_profesores_report(request):
     return JsonResponse({'profesores': data}, status=200)
 
 # Reporte de Facturas (ya filtrado entre fechas)
-from django.db.models import Q
+from django.http import JsonResponse
+from django.utils import timezone
+from datetime import datetime
+from .models import Factura
+from .utils import validar_fechas  # Asumo que tienes la función de validar fechas
 
+# Reporte de Facturas
 def get_facturas_report(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
 
+    # Validar las fechas
     fecha_inicio, fecha_fin = validar_fechas(fecha_inicio, fecha_fin)
 
     if not fecha_inicio or not fecha_fin:
         return JsonResponse({'error': 'Fechas no válidas'}, status=400)
 
-    # Ajustar la fecha de fin para incluir todo el día
-    fecha_fin = fecha_fin.replace(hour=23, minute=59, second=59, microsecond=999999)
+    # Asegurar que las fechas están en la zona horaria correcta
+    fecha_inicio = timezone.make_aware(fecha_inicio)
+    
+    # Crear un nuevo objeto datetime con los valores ajustados de fecha_fin
+    fecha_fin = timezone.make_aware(datetime(fecha_fin.year, fecha_fin.month, fecha_fin.day, 23, 59, 59, 999999))
 
     # Filtrar las facturas entre las fechas proporcionadas
     facturas = Factura.objects.filter(fecha_emision__range=(fecha_inicio, fecha_fin))
@@ -163,7 +172,9 @@ def get_facturas_report(request):
         }
         for f in facturas
     ]
+    
     return JsonResponse({'facturas': data}, status=200)
+
 
 
 # Reporte de Tarifas

@@ -19,5 +19,5 @@ urlpatterns = [
     # Reporte de Tarifas
     path('reporte/tarifas/', views.get_tarifas_report, name='reporte_tarifas'),
 ]
-]
+
 

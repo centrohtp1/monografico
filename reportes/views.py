@@ -31,10 +31,10 @@ def get_estudiantes_report(request):
         return JsonResponse({'estudiantes': estudiantes_data}, status=200)
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas de inicio y fin'}, status=400)
-from django.http import JsonResponse
+
 from django.db.models import Sum, F
-from .models import Factura, CuentaPorCobrar, Tarifa, Seccion, Curso, Profesor
-from estudiantes.models import Estudiante
+
+
 from datetime import datetime
 
 # Función auxiliar para validar fechas

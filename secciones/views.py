@@ -75,17 +75,29 @@ def editar_seccion_api(request, seccion_id):
 @api_view(['DELETE'])
 def eliminar_seccion_api(request, seccion_id):
     try:
-        # Intentar obtener la sección
+        # Buscar la sección por ID, o devolver un 404 si no existe
         seccion = get_object_or_404(Seccion, id=seccion_id)
 
-        # Intentar eliminar la sección
+        # Eliminar la sección
         seccion.delete()
 
-        # Si la eliminación fue exitosa, devolver una respuesta positiva
-        return Response({'success': True, 'message': 'Sección eliminada exitosamente.'}, status=status.HTTP_200_OK)
+        # Devolver una respuesta exitosa
+        return Response(
+            {'success': True, 'message': 'Sección eliminada exitosamente.'},
+            status=status.HTTP_200_OK
+        )
+    except Seccion.DoesNotExist:
+        # Manejar el caso en que la sección no existe (aunque get_object_or_404 ya hace esto)
+        return Response(
+            {'success': False, 'error': 'La sección no existe.'},
+            status=status.HTTP_404_NOT_FOUND
+        )
     except Exception as e:
-        # Capturar cualquier excepción y devolver una respuesta de error con el detalle
-        return Response({'success': False, 'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # Capturar cualquier otra excepción
+        return Response(
+            {'success': False, 'error': str(e)},
+            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+        )
 
 
 

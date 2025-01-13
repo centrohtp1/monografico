@@ -3,282 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generar Reporte de Estudiantes</title>
-    <!-- Incluir el CSS de SweetAlert2 -->
+    <title>Generar Reportes</title>
+    <!-- CSS de SweetAlert2 -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-
-</head>
-<body>
-    <div style="text-align: center; margin-top: 50px;">
-        <h1>Generar Reporte de Estudiantes</h1>
-        <button id="generate-estudiantes-report" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-            Generar Reporte PDF
-        </button>
-
-        <!-- Botón de descarga (oculto inicialmente) -->
-        <button id="download-report" style="display: none; margin-top: 20px; padding: 10px 20px; font-size: 16px; cursor: pointer;">
-            Descargar Reporte PDF
-        </button>
-    </div>
-
-    <!-- Incluir el script de SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Incluir el script principal -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('generate-estudiantes-report').addEventListener('click', function () {
-            // Solicitar fechas con SweetAlert
-            Swal.fire({
-                title: 'Selecciona el rango de fechas',
-                html: `
-                    <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
-                    <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
-                `,
-                focusConfirm: false,
-                preConfirm: () => {
-                    const fechaInicio = document.getElementById('fechaInicio').value;
-                    const fechaFin = document.getElementById('fechaFin').value;
-                    if (!fechaInicio || !fechaFin) {
-                        Swal.showValidationMessage('Ambas fechas son obligatorias');
-                        return false;
-                    }
-                    return { fechaInicio, fechaFin };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    const { fechaInicio, fechaFin } = result.value;
-
-                    // Mostrar un cargando mientras se procesa
-                    Swal.fire({
-                        title: 'Obteniendo datos...',
-                        text: 'Por favor espera unos segundos',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
-                        }
-                    });
-
-                    // Solicitar la lista de estudiantes al backend
-                    const url = `https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-
-                    fetch(url)
-                        .then(response => {
-                            if (response.ok) {
-                                return response.json(); // Recibir los datos como JSON
-                            } else {
-                                throw new Error('No se pudo obtener la lista de estudiantes');
-                            }
-                        })
-                        .then(data => {
-                            Swal.close(); // Cerrar el mensaje de carga
-
-                            if (data.estudiantes && data.estudiantes.length > 0) {
-                                // Generar el PDF con los datos
-                                generarPDF(data.estudiantes);
-                            } else {
-                                Swal.fire({
-                                    icon: 'info',
-                                    title: 'Sin resultados',
-                                    text: 'No se encontraron estudiantes en el rango de fechas seleccionado',
-                                });
-                            }
-                        })
-                        .catch(error => {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error',
-                                text: error.message,
-                            });
-                        });
-                }
-            });
-        });
-
-        // Función para generar el PDF
-        function generarPDF(estudiantes) {
-            const doc = new jsPDF();
-
-            // Agregar título al PDF
-            doc.setFontSize(18);
-            doc.text('Reporte de Estudiantes', 105, 20, { align: 'center' });
-
-            // Agregar tabla de estudiantes
-            const tableColumn = ['ID', 'Nombre', 'Apellido', 'Fecha de Ingreso'];
-            const tableRows = estudiantes.map(est => [
-                est.id,
-                est.nombre,
-                est.apellido,
-                est.fecha_ingreso,
-            ]);
-
-            doc.autoTable({
-                head: [tableColumn],
-                body: tableRows,
-                startY: 30,
-            });
-
-            // Descargar el archivo PDF
-            doc.save('reporte_estudiantes.pdf');
-        }
-    });
-</script>
-
-</body>
-</html>
-
-
-
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Generar Reporte de Estudiantes</title>
-    <!-- Incluir el CSS de SweetAlert2 -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <!-- Incluir jsPDF y html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.min.js"></script>
 </head>
 <body>
     <div style="text-align: center; margin-top: 50px;">
-        <h1>Generar Reporte de Estudiantes</h1>
-        <button id="generate-estudiantes-report" style="padding: 10px 20px; font-size: 16px; cursor: pointer;">
-            Generar Reporte PDF
-        </button>
+        <h1>Generar Reportes</h1>
+        <!-- Botones para los diferentes reportes -->
+        <div style="margin-top: 20px;">
+            <button class="report-button" data-report="estudiantes" style="padding: 10px 20px; font-size: 16px;">Reporte de Estudiantes</button>
+            <button class="report-button" data-report="secciones" style="padding: 10px 20px; font-size: 16px;">Reporte de Secciones</button>
+            <button class="report-button" data-report="cursos" style="padding: 10px 20px; font-size: 16px;">Reporte de Cursos</button>
+            <button class="report-button" data-report="profesores" style="padding: 10px 20px; font-size: 16px;">Reporte de Profesores</button>
+            <button class="report-button" data-report="facturas" style="padding: 10px 20px; font-size: 16px;">Reporte de Facturas</button>
+            <button class="report-button" data-report="tarifas" style="padding: 10px 20px; font-size: 16px;">Reporte de Tarifas</button>
+        </div>
     </div>
 
-    <div id="report-section" style="display:none; padding: 20px; margin-top: 30px; border: 1px solid #ccc;">
-        <h2>Reporte de Estudiantes</h2>
-        <table border="1" style="width: 100%; text-align: left; border-collapse: collapse;">
+    <!-- Sección para mostrar los reportes -->
+    <div id="report-section" style="display: none; padding: 20px; margin-top: 30px; border: 1px solid #ccc; border-radius: 8px;">
+        <h2 id="report-title">Reporte</h2>
+        <table class="styled-table" style="width: 100%; border-collapse: collapse;">
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Apellido</th>
-                    <th>Fecha de Ingreso</th>
+                <tr id="table-headers">
+                    <!-- Encabezados dinámicos -->
                 </tr>
             </thead>
-            <tbody id="students-table-body">
-                <!-- Los estudiantes se añadirán aquí dinámicamente -->
+            <tbody id="table-body">
+                <!-- Filas dinámicas -->
             </tbody>
         </table>
     </div>
 
-    <!-- Incluir el script de SweetAlert2 -->
+    <iframe id="pdf-viewer" style="width: 100%; height: 600px; border: none;"></iframe>
+
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            document.getElementById('generate-estudiantes-report').addEventListener('click', async function () {
-                // Mostrar alerta de selección de fecha
-                const result = await Swal.fire({
-                    title: 'Selecciona el rango de fechas',
-                    html: `
-                        <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
-                        <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
-                    `,
-                    focusConfirm: false,
-                    preConfirm: () => {
-                        const fechaInicio = document.getElementById('fechaInicio').value;
-                        const fechaFin = document.getElementById('fechaFin').value;
-                        if (!fechaInicio || !fechaFin) {
-                            Swal.showValidationMessage('Ambas fechas son obligatorias');
-                            return false;
-                        }
-                        return { fechaInicio, fechaFin };
-                    }
-                });
+        document.addEventListener('DOMContentLoaded', () => {
+            // Configuración base de las URLs para cada reporte
+            const reportUrls = {
+                estudiantes: 'https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/',
+                secciones: 'https://web-production-3f4f.up.railway.app/reporte/reporte-secciones/',
+                cursos: 'https://web-production-3f4f.up.railway.app/reporte/reporte-cursos/',
+                profesores: 'https://web-production-3f4f.up.railway.app/reporte/reporte-profesores/',
+                facturas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-facturas/',
+                tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
+            };
 
-                if (result.isConfirmed) {
-                    const { fechaInicio, fechaFin } = result.value;
-                    // Mostrar carga mientras obtenemos los datos
-                    Swal.fire({
-                        title: 'Obteniendo datos...',
-                        text: 'Por favor espera unos segundos',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading();
+            // Evento para cada botón de reporte
+            document.querySelectorAll('.report-button').forEach(button => {
+                button.addEventListener('click', async () => {
+                    const reportType = button.dataset.report;
+
+                    // Pedir rango de fechas
+                    const result = await Swal.fire({
+                        title: 'Selecciona el rango de fechas',
+                        html: `  
+                            <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
+                            <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
+                        `,
+                        focusConfirm: false,
+                        preConfirm: () => {
+                            const fechaInicio = document.getElementById('fechaInicio').value;
+                            const fechaFin = document.getElementById('fechaFin').value;
+                            if (!fechaInicio || !fechaFin) {
+                                Swal.showValidationMessage('Ambas fechas son obligatorias');
+                                return false;
+                            }
+                            return { fechaInicio, fechaFin };
                         }
                     });
 
-                    try {
-                        const url = `https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
-                        const response = await fetch(url);
-                        const data = await response.json();
+                    if (result.isConfirmed) {
+                        const { fechaInicio, fechaFin } = result.value;
+                        const url = `${reportUrls[reportType]}?fecha_inicio=${fechaInicio}&fecha_fin=${fechaFin}`;
 
-                        if (data.estudiantes && data.estudiantes.length > 0) {
-                            mostrarEstudiantes(data.estudiantes);
+                        try {
+                            const response = await fetch(url);
+                            const data = await response.json();
 
-                            // Botón para exportar el PDF
-                            const exportButton = document.createElement('button');
-                            exportButton.innerHTML = 'Descargar PDF';
-                            exportButton.style.padding = '10px 20px';
-                            exportButton.style.fontSize = '16px';
-                            exportButton.style.cursor = 'pointer';
-                            exportButton.style.marginTop = '20px';
-                            exportButton.addEventListener('click', exportarPDF);
-                            document.body.appendChild(exportButton);
-                        } else {
+                            if (data && data[reportType] && data[reportType].length > 0) {
+                                mostrarReporte(data[reportType], reportType);
+                            } else {
+                                Swal.fire({
+                                    icon: 'info',
+                                    title: 'Sin resultados',
+                                    text: `No se encontraron datos para el reporte de ${reportType} en el rango seleccionado.`,
+                                });
+                            }
+                        } catch (error) {
                             Swal.fire({
-                                icon: 'info',
-                                title: 'Sin resultados',
-                                text: 'No se encontraron estudiantes en el rango de fechas seleccionado',
+                                icon: 'error',
+                                title: 'Error',
+                                text: `No se pudo obtener el reporte de ${reportType}: ${error.message}`,
                             });
                         }
-                    } catch (error) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'No se pudo obtener los datos: ' + error.message,
-                        });
                     }
-                }
+                });
             });
 
-            function mostrarEstudiantes(estudiantes) {
-                const tbody = document.getElementById('students-table-body');
+            function mostrarReporte(data, reportType) {
+                const reportTitle = {
+                    estudiantes: 'Reporte de Estudiantes',
+                    secciones: 'Reporte de Secciones',
+                    cursos: 'Reporte de Cursos',
+                    profesores: 'Reporte de Profesores',
+                    facturas: 'Reporte de Facturas',
+                    tarifas: 'Reporte de Tarifas',
+                };
+
+                const headers = {
+                    estudiantes: ['Matricula', 'Nombre', 'Apellido', 'Fecha de Ingreso'],
+                    secciones: ['ID', 'Nombre', 'Descripción'],
+                    cursos: ['ID', 'Nombre del Curso', 'Duración'],
+                    profesores: ['ID', 'Nombre', 'Especialidad'],
+                    facturas: ['ID', 'Cliente', 'Monto', 'Fecha'],
+                    tarifas: ['ID', 'Concepto', 'Costo'],
+                };
+
+                const tbody = document.getElementById('table-body');
+                const thead = document.getElementById('table-headers');
+                const reportSection = document.getElementById('report-section');
+                document.getElementById('report-title').innerText = reportTitle[reportType];
                 tbody.innerHTML = '';
-                estudiantes.forEach(est => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${est.id}</td>
-                        <td>${est.nombre}</td>
-                        <td>${est.apellido}</td>
-                        <td>${est.fecha_ingreso}</td>
-                    `;
-                    tbody.appendChild(row);
+                thead.innerHTML = '';
+
+                // Crear encabezados
+                headers[reportType].forEach(header => {
+                    const th = document.createElement('th');
+                    th.innerText = header;
+                    th.style.backgroundColor = '#4CAF50';
+                    th.style.color = 'white';
+                    th.style.padding = '10px';
+                    thead.appendChild(th);
                 });
 
-                document.getElementById('report-section').style.display = 'block';
-            }
-
-            async function exportarPDF() {
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const reportSection = document.getElementById('report-section');
-                try {
-                    const canvas = await html2canvas(reportSection, { scale: 2, useCORS: true, logging: false });
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = 190;
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-                    pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
-
-                    // Generar el PDF y mostrarlo en una nueva ventana
-                    const pdfData = pdf.output('blob');
-                    const pdfUrl = URL.createObjectURL(pdfData);
-                    window.open(pdfUrl, '_blank');
-                } catch (error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error al generar el PDF',
-                        text: 'Hubo un error al crear el archivo PDF: ' + error.message,
+                // Crear filas
+                data.forEach(item => {
+                    const tr = document.createElement('tr');
+                    headers[reportType].forEach(key => {
+                        const td = document.createElement('td');
+                        td.innerText = item[key.toLowerCase()] || 'N/A';
+                        td.style.padding = '10px';
+                        td.style.border = '1px solid #ddd';
+                        tr.appendChild(td);
                     });
-                }
+                    tbody.appendChild(tr);
+                });
+
+                // Mostrar la tabla
+                reportSection.style.display = 'block';
             }
         });
     </script>

@@ -1,3 +1,4 @@
+from datetime import timezone
 from django.http import JsonResponse
 from estudiantes.models import Estudiante
 import pandas as pd
@@ -48,6 +49,9 @@ def get_anos_escolares(request):
     desde = request.GET.get('fecha_inicio')
     hasta = request.GET.get('fecha_fin')
 
+    # Obtener la fecha actual
+    fecha_actual = timezone.now().date()
+
     # Validación de los parámetros
     if desde and hasta:
         try:
@@ -59,6 +63,12 @@ def get_anos_escolares(request):
 
         # Filtrar los años escolares dentro del rango de fechas
         anos_escolares = AnioEscolar.objects.filter(fecha_ingreso__range=(desde, hasta))
+
+        # Verificar si hay algún registro con la fecha actual
+        anos_escolares_actual = AnioEscolar.objects.filter(fecha_ingreso=fecha_actual)
+
+        # Combinar los resultados (sin duplicados)
+        anos_escolares = anos_escolares | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
         anos_escolares_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))

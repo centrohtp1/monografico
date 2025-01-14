@@ -48,14 +48,15 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Configuración base de las URLs para cada reporte
             const reportUrls = {
-                estudiantes: 'https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/',
-                secciones: 'https://web-production-3f4f.up.railway.app/reporte/reporte-secciones/',
-                cursos: 'https://web-production-3f4f.up.railway.app/reporte/reporte-cursos/',
-                profesores: 'https://web-production-3f4f.up.railway.app/reporte/reporte-profesores/',
-                facturas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-facturas/',
-                tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
-                anio: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/',
-            };
+    estudiantes: 'https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/',
+    secciones: 'https://web-production-3f4f.up.railway.app/reporte/reporte-secciones/',
+    cursos: 'https://web-production-3f4f.up.railway.app/reporte/reporte-cursos/',
+    profesores: 'https://web-production-3f4f.up.railway.app/reporte/reporte-profesores/',
+    facturas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-facturas/',
+    tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
+    anio: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/',  // Verifica esta URL
+};
+
 
             // Evento para cada botón de reporte
             document.querySelectorAll('.report-button').forEach(button => {
@@ -127,7 +128,7 @@
                     profesores: ['ID', 'Nombre', 'Especialidad'],
                     facturas: ['ID', 'Cliente', 'Monto', 'Fecha'],
                     tarifas: ['ID', 'Concepto', 'Costo'],
-                    anio: ['ID', 'anio', 'activo'],
+                    anio: ['ID', 'nombre', 'activo','fecha_ingreso' ],
                 };
 
                 const tbody = document.getElementById('table-body');

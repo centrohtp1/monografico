@@ -11,7 +11,8 @@ from Cursos.models import Curso
 
 
 from django.core.exceptions import ValidationError
-from anio_escolar.models import AnioEscolar
+from anio_escolar import AnioEscolar
+
 
 
 

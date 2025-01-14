@@ -20,6 +20,8 @@
             <button class="report-button" data-report="profesores" style="padding: 10px 20px; font-size: 16px;">Reporte de Profesores</button>
             <button class="report-button" data-report="facturas" style="padding: 10px 20px; font-size: 16px;">Reporte de Facturas</button>
             <button class="report-button" data-report="tarifas" style="padding: 10px 20px; font-size: 16px;">Reporte de Tarifas</button>
+            <button class="report-button" data-report="AnioEscolar" style="padding: 10px 20px; font-size: 16px;">Reporte de anio</button>
+      
         </div>
     </div>
 
@@ -52,6 +54,7 @@
                 profesores: 'https://web-production-3f4f.up.railway.app/reporte/reporte-profesores/',
                 facturas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-facturas/',
                 tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
+                anio: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/',
             };
 
             // Evento para cada botón de reporte
@@ -114,6 +117,7 @@
                     profesores: 'Reporte de Profesores',
                     facturas: 'Reporte de Facturas',
                     tarifas: 'Reporte de Tarifas',
+                    anio: 'Reporte de anios escolares',
                 };
 
                 const headers = {
@@ -123,6 +127,7 @@
                     profesores: ['ID', 'Nombre', 'Especialidad'],
                     facturas: ['ID', 'Cliente', 'Monto', 'Fecha'],
                     tarifas: ['ID', 'Concepto', 'Costo'],
+                    anio: ['ID', 'anio', 'activo'],
                 };
 
                 const tbody = document.getElementById('table-body');

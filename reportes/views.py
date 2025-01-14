@@ -45,8 +45,8 @@ def get_estudiantes_report(request):
 
 def get_anos_escolares(request):
     # Obtener los parámetros 'desde' y 'hasta' de la query string
-    desde = request.GET.get('desde')
-    hasta = request.GET.get('hasta')
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
 
     # Validación de los parámetros
     if desde and hasta:

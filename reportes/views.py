@@ -42,39 +42,29 @@ def get_estudiantes_report(request):
 
 
 
-def obtener_anos_escolares(request):
 
- #   Vista para obtener los años escolares dentro de un rango de fechas ('desde' y 'hasta').
- #   Recibe dos parámetros de consulta: 'desde' (fecha de inicio) y 'hasta' (fecha de fin).
-   
+def get_anos_escolares(request):
     # Obtener los parámetros 'desde' y 'hasta' de la query string
     desde = request.GET.get('desde')
     hasta = request.GET.get('hasta')
 
     # Validación de los parámetros
-    if not desde or not hasta:
-        return JsonResponse({'error': 'Los parámetros "desde" y "hasta" son obligatorios.'}, status=400)
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
 
-    try:
-        # Convertir los valores de 'desde' y 'hasta' a fechas
-        desde = pd.to_datetime(desde)
-        hasta = pd.to_datetime(hasta)
+        # Filtrar los años escolares dentro del rango de fechas
+        anos_escolares = AnioEscolar.objects.filter(fecha_ingreso__range=(desde, hasta))
 
-    except ValueError:
-        return JsonResponse({'error': 'Los parámetros "desde" y "hasta" deben tener el formato de fecha correcto (YYYY-MM-DD).'}, status=400)
+        # Crear una lista con los datos de los años escolares
+        anos_escolares_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))
 
-    # Filtrar los años escolares dentro del rango de fechas
-    anos_escolares = AnioEscolar.objects.filter(
-        fecha_ingreso__range=(desde, hasta)
-    ).order_by('fecha_ingreso')
-
-    # Verificar si se encontraron años escolares
-    if not anos_escolares.exists():
-        return JsonResponse({'info': 'No se encontraron años escolares en el rango especificado.'}, status=404)
-
-    # Crear una lista con los datos de los años escolares
-    anos_escolares_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))
-
-    # Retornar el JSON con los datos de los años escolares
-    return JsonResponse({'anos_escolares': anos_escolares_data}, status=200)
-
+        # Retornar el JSON con los datos de los años escolares
+        return JsonResponse({'anos_escolares': anos_escolares_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)

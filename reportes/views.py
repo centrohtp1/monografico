@@ -10,6 +10,11 @@ from facturacion.models import Factura
 from Cursos.models import Curso
 
 
+from django.core.exceptions import ValidationError
+from .models import AnioEscolar
+
+
+
 def get_estudiantes_report(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
@@ -34,11 +39,7 @@ def get_estudiantes_report(request):
     
 
 
-# anio_escolar/views.py
-from django.http import JsonResponse
-from django.core.exceptions import ValidationError
-from .models import AnioEscolar
-import pandas as pd
+
 
 def obtener_anos_escolares(request):
     """

@@ -63,19 +63,19 @@ def get_anos_escolares(request):
             return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
 
         # Filtrar los años escolares dentro del rango de fechas
-        anos_escolares = AnioEscolar.objects.filter(fecha_ingreso__range=(desde, hasta))
+        anios = AnioEscolar.objects.filter(fecha_ingreso__range=(desde, hasta))
 
         # Verificar si hay algún registro con la fecha actual
         anos_escolares_actual = AnioEscolar.objects.filter(fecha_ingreso=fecha_actual)
 
         # Combinar los resultados (sin duplicados)
-        anos_escolares = anos_escolares | anos_escolares_actual
+        anios = anios | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))
+        estudiantes_data = list(anios.values('id', 'nombre', 'activo', 'fecha_ingreso'))
 
         # Retornar el JSON con los datos de los años escolares
-        return JsonResponse({'anos_escolares': estudiantes_data}, status=200)
+        return JsonResponse({'anios': estudiantes_data}, status=200)
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)

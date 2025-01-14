@@ -72,10 +72,10 @@ def get_anos_escolares(request):
         anos_escolares = anos_escolares | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
-        anos_escolares_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))
+        anio_data = list(anos_escolares.values('id', 'nombre', 'activo', 'fecha_ingreso'))
 
         # Retornar el JSON con los datos de los años escolares
-        return JsonResponse({'anos_escolares': anos_escolares_data}, status=200)
+        return JsonResponse({'anos_escolares': anio_data}, status=200)
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)

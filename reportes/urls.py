@@ -4,6 +4,7 @@ from reportes import views
 
 urlpatterns = [
     path('reporte-estudiantes/', views.get_estudiantes_report, name='get_estudiantes_report'),
+    path('reporte-anioescolar/', views.obtener_anos_escolares, name='get_anioescolar_report'),
 
 ]
 

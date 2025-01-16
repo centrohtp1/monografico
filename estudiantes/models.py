@@ -51,10 +51,8 @@ class Estudiante(models.Model):
   
   
 ]
-solo_letras = RegexValidator(
-    r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', 
-    'Este campo solo puede contener letras, incluyendo acentos y espacios.'
-)
+ solo_letras = RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', 'Este campo solo puede contener letras.')
+
 
 
     # Datos personales

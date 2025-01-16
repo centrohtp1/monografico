@@ -51,7 +51,11 @@ class Estudiante(models.Model):
   
   
 ]
-    solo_letras = RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ]+$', 'Este campo solo puede contener letras.')
+solo_letras = RegexValidator(
+    r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', 
+    'Este campo solo puede contener letras, incluyendo acentos y espacios.'
+)
+
 
     # Datos personales
     nombre = models.CharField(max_length=50, verbose_name= "Nombres",validators=[solo_letras] )

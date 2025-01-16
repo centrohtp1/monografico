@@ -7,6 +7,8 @@ from anio_escolar.models import AnioEscolar
 from django.core.validators import RegexValidator
 from django.core.exceptions import ValidationError
 
+import re
+
 
 class Estudiante(models.Model):
     Ciudades = [
@@ -54,10 +56,12 @@ class Estudiante(models.Model):
   
 ]
 
+
 def solo_letras(value):
-    for char in value:
-        if not (char.isalpha() or char.isspace() or char in 'áéíóúÁÉÍÓÚüÜñÑ'):
-            raise ValidationError('Este campo solo puede contener letras, incluyendo acentos y espacios.')
+    # Verifica si el valor contiene solo letras, espacios y caracteres con acento
+    if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', value):
+        raise ValidationError('Este campo solo puede contener letras, incluyendo acentos y espacios.')
+
 
 
     # Datos personales

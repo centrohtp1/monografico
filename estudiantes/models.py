@@ -5,6 +5,8 @@ from django.utils import timezone
 
 from anio_escolar.models import AnioEscolar
 from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator
+
 
 class Estudiante(models.Model):
     Ciudades = [
@@ -51,9 +53,10 @@ class Estudiante(models.Model):
   
   
 ]
- solo_letras = RegexValidator(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', 'Este campo solo puede contener letras.')
-
-
+solo_letras = RegexValidator(
+    r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$',
+    'Este campo solo puede contener letras, incluyendo acentos y espacios.'
+)
 
     # Datos personales
     nombre = models.CharField(max_length=50, verbose_name= "Nombres",validators=[solo_letras] )

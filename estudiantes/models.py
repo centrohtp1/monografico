@@ -57,16 +57,15 @@ class Estudiante(models.Model):
 ]
 
 
-def solo_letras(value):
-    # Verifica si el valor contiene solo letras, espacios y caracteres con acento
-    if not re.match(r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$', value):
-        raise ValidationError('Este campo solo puede contener letras, incluyendo acentos y espacios.')
-
+   solo_letras = RegexValidator(
+    regex=r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s]+$',  # Expresión regular para letras y espacios
+    message='Este campo solo puede contener letras, incluyendo acentos y espacios.'
+)
 
 
     # Datos personales
-    nombre = models.CharField(max_length=50, verbose_name= "Nombres",validators=[solo_letras] )
-    apellido = models.CharField(max_length=50, verbose_name="Aplleidos",validators=[solo_letras] )
+    nombre = models.CharField(max_length=50, verbose_name= "Nombres")
+    apellido = models.CharField(max_length=50, verbose_name="Aplleidos")
     fecha_nacimiento = models.DateField()
     genero = models.CharField(
         max_length=10,
@@ -102,6 +101,17 @@ def solo_letras(value):
     # Métodos especiales
     def __str__(self):
         return f"{self.nombre} {self.apellido} - {self.matricula}"
+
+
+      # Validación personalizada en clean()
+    def clean(self):
+        # Verificar que solo contenga letras, espacios y acentos
+        if not all(c.isalpha() or c.isspace() or c in 'áéíóúÁÉÍÓÚüÜñÑ' for c in self.nombre):
+            raise ValidationError('El nombre solo puede contener letras, incluyendo acentos y espacios.')
+
+        if not all(c.isalpha() or c.isspace() or c in 'áéíóúÁÉÍÓÚüÜñÑ' for c in self.apellido):
+            raise ValidationError('El apellido solo puede contener letras, incluyendo acentos y espacios.')
+        
 
     def save(self, *args, **kwargs):
         if not self.matricula:

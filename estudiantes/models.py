@@ -5,7 +5,7 @@ from django.utils import timezone
 
 from anio_escolar.models import AnioEscolar
 from django.core.validators import RegexValidator
-from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 
 class Estudiante(models.Model):
@@ -53,10 +53,12 @@ class Estudiante(models.Model):
   
   
 ]
-solo_letras = RegexValidator(
-    r'^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ ]+$',
-    'Este campo solo puede contener letras, incluyendo acentos y espacios.'
-)
+
+def solo_letras(value):
+    for char in value:
+        if not (char.isalpha() or char.isspace() or char in 'áéíóúÁÉÍÓÚüÜñÑ'):
+            raise ValidationError('Este campo solo puede contener letras, incluyendo acentos y espacios.')
+
 
     # Datos personales
     nombre = models.CharField(max_length=50, verbose_name= "Nombres",validators=[solo_letras] )

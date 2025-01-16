@@ -13,16 +13,16 @@ class EstudianteSerializer(serializers.ModelSerializer):
         return value
 
     # Validación personalizada para el campo nombre (solo letras y sin números)
-    def validate_nombre(self, value):
-        if not value.isalpha():
-            raise serializers.ValidationError("El nombre solo puede contener letras.")
-        return value
+#    def validate_nombre(self, value):
+#        if not value.isalpha():
+  #          raise serializers.ValidationError("El nombre solo puede contener letras.")
+#        return value
 
     # Validación personalizada para el campo apellido (solo letras y sin números)
-    def validate_apellido(self, value):
-        if not value.isalpha():
-            raise serializers.ValidationError("El apellido solo puede contener letras.")
-        return value
+#    def validate_apellido(self, value):
+#        if not value.isalpha():
+ #           raise serializers.ValidationError("El apellido solo puede contener letras.")
+#        return value
 
     class Meta:
         model = Estudiante

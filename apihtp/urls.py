@@ -46,6 +46,7 @@ urlpatterns = [
          path('usuarios/', include('usuarioshtp.urls')),  
          path('anioescolar/', include('anio_escolar.urls')),  # API para "secciones"
          path('reporte/', include('reportes.urls')),  # Incluir las URLs de la app "facturacion"
+              path('notificaciones/', include('notificaciones.urls')),  # Incluir las URLs de la app "facturacion"
      
       path('secciones/', include('secciones.urls')),  # Incluir las URLs de la app "secciones"
     path('facturacion/', include('facturacion.urls')),  # Incluir las URLs de la app "facturacion"

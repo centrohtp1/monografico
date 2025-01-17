@@ -53,6 +53,8 @@ INSTALLED_APPS = [
     'facturacion',
        'reportes',
          'usuarioshtp',
+             'notificaciones',
+
 
 
 ]

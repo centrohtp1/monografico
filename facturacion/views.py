@@ -103,6 +103,8 @@ def generar_cuentas_api(request):
             return Response({"success": "\n".join(mensajes_exito)}, status=status.HTTP_201_CREATED)
         if mensajes_error:
             return Response({"errors": "\n".join(mensajes_error)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"info": "No se generaron cuentas ni facturas. No hay secciones por facturar."}, status=status.HTTP_204_NO_CONTENT)
+
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

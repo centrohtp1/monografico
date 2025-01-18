@@ -114,7 +114,7 @@ def get_profesores(request):
         estudiantes_data = list(profesores.values('id', 'nombre', 'apellido', 'especialidad','telefono'))
 
         # Retornar el JSON con los datos de los años escolares
-        return JsonResponse({'anios': estudiantes_data}, status=200)
+        return JsonResponse({'profesores': estudiantes_data}, status=200)
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
@@ -150,7 +150,7 @@ def get_cursos(request):
         estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion', 'profesores'))
 
         # Retornar el JSON con los datos de los años escolares
-        return JsonResponse({'anios': estudiantes_data}, status=200)
+        return JsonResponse({'cursos': estudiantes_data}, status=200)
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
@@ -187,7 +187,7 @@ def get_secciones(request):
         estudiantes_data = list(secciones.values('id', 'nombre', 'curso', 'fecha_inicio', 'fecha_termino'))
 
         # Retornar el JSON con los datos de los años escolares
-        return JsonResponse({'anios': estudiantes_data}, status=200)
+        return JsonResponse({'secciones': estudiantes_data}, status=200)
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)

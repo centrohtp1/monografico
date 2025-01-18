@@ -45,3 +45,7 @@ class SeccionEstudiante(models.Model):
 class Meta:
             verbose_name = "Sección Estudiante"
             verbose_name_plural = "Sección Estudiantes"
+
+
+
+

@@ -9,15 +9,17 @@ from secciones.models import Seccion
 from profesores.models import Profesor
 from facturacion.models import Factura
 from Cursos.models import Curso
+from rest_framework.decorators import api_view
 
-
+from django.shortcuts import get_object_or_404
+from secciones.models import Seccion, SeccionEstudiante
 from django.core.exceptions import ValidationError
 from anio_escolar.models import AnioEscolar
 from django.utils import timezone
+from rest_framework import status
 
 
-
-
+@api_view(['GET'])
 def get_estudiantes_report(request):
     fecha_inicio = request.GET.get('fecha_inicio')
     fecha_fin = request.GET.get('fecha_fin')
@@ -44,7 +46,7 @@ def get_estudiantes_report(request):
 
 
 
-
+@api_view(['GET'])
 def get_anos_escolares(request):
     # Obtener los parámetros 'desde' y 'hasta' de la query string
     desde = request.GET.get('fecha_inicio')
@@ -79,3 +81,147 @@ def get_anos_escolares(request):
     
     else:
         return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
+
+
+@api_view(['GET'])
+def get_profesores(request):
+    # Obtener los parámetros 'desde' y 'hasta' de la query string
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
+
+    # Obtener la fecha actual
+    fecha_actual = timezone.now().date()
+
+    # Validación de los parámetros
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
+
+        # Filtrar los años escolares dentro del rango de fechas
+        anios = Profesor.objects.filter(fecha_contratacion__range=(desde, hasta))
+
+        # Verificar si hay algún registro con la fecha actual
+        anos_escolares_actual = Profesor.objects.filter(fecha_contratacion=fecha_actual)
+
+        # Combinar los resultados (sin duplicados)
+        anios = anios | anos_escolares_actual
+
+        # Crear una lista con los datos de los años escolares
+        estudiantes_data = list(anios.values('id', 'nombre', 'apellido', 'especialidad','telefono'))
+
+        # Retornar el JSON con los datos de los años escolares
+        return JsonResponse({'anios': estudiantes_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
+    
+@api_view(['GET'])
+def get_cursos(request):
+    # Obtener los parámetros 'desde' y 'hasta' de la query string
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
+
+    # Obtener la fecha actual
+    fecha_actual = timezone.now().date()
+
+    # Validación de los parámetros
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
+
+        # Filtrar los años escolares dentro del rango de fechas
+        anios = Curso.objects.filter(fecha_creacion__range=(desde, hasta))
+
+        # Verificar si hay algún registro con la fecha actual
+        anos_escolares_actual = Curso.objects.filter(fecha_creacion=fecha_actual)
+
+        # Combinar los resultados (sin duplicados)
+        anios = anios | anos_escolares_actual
+
+        # Crear una lista con los datos de los años escolares
+        estudiantes_data = list(anios.values('id', 'nombre', 'descripcion', 'profesores'))
+
+        # Retornar el JSON con los datos de los años escolares
+        return JsonResponse({'anios': estudiantes_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
+    
+
+@api_view(['GET'])
+def get_secciones(request):
+    # Obtener los parámetros 'desde' y 'hasta' de la query string
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
+
+    # Obtener la fecha actual
+    fecha_actual = timezone.now().date()
+
+    # Validación de los parámetros
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
+
+        # Filtrar los años escolares dentro del rango de fechas
+        anios = Seccion.objects.filter(fecha_inicio__range=(desde, hasta))
+
+        # Verificar si hay algún registro con la fecha actual
+        anos_escolares_actual = Seccion.objects.filter(fecha_inicio=fecha_actual)
+
+        # Combinar los resultados (sin duplicados)
+        anios = anios | anos_escolares_actual
+
+        # Crear una lista con los datos de los años escolares
+        estudiantes_data = list(anios.values('id', 'nombre', 'curso', 'fecha_inicio', 'fecha_termino'))
+
+        # Retornar el JSON con los datos de los años escolares
+        return JsonResponse({'anios': estudiantes_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
+    
+
+@api_view(['GET'])
+def obtener_estudiantes_por_seccion(request, seccion_id):
+    try:
+        # Obtener la sección por ID, si no existe retornar un error 404
+        seccion = get_object_or_404(Seccion, id=seccion_id)
+
+        # Obtener los estudiantes asociados a la sección
+        estudiantes_seccion = SeccionEstudiante.objects.filter(seccion=seccion)
+
+        # Verificar si la sección tiene estudiantes
+        if not estudiantes_seccion.exists():
+            return JsonResponse({'error': 'No hay estudiantes asignados a esta sección'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Preparar los datos de los estudiantes
+        estudiantes_data = []
+
+        for seccion_estudiante in estudiantes_seccion:
+            estudiante = seccion_estudiante.estudiante
+            estudiantes_data.append({
+                'id': estudiante.id,
+                'nombre': estudiante.nombre,
+                'apellido': estudiante.apellido,
+                'estado': seccion_estudiante.estado,
+                'nota': seccion_estudiante.nota,
+            })
+
+        # Retornar la respuesta en formato JSON
+        return JsonResponse({'estudiantes': estudiantes_data}, status=status.HTTP_200_OK)
+    
+    except Exception as e:
+        # Si ocurre cualquier otro error, retornar un error genérico
+        return JsonResponse({'error': f'Ocurrió un error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

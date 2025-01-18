@@ -6,13 +6,13 @@ from .views import (
     generar_cuentas_api,
     pagar_factura_api,
     listar_facturas_api,
-    obtener_detalle_factura, resumen_facturas_api,resumen_dashboard
+    obtener_detalle_factura, resumen_facturas_api
 )
 
 urlpatterns = [
 
     path('resumen/', resumen_facturas_api, name='resumen_facturas'),
-       path('resumend/', resumen_dashboard, name='resumen_dash'),
+    
     path('tarifas/', TarifaListCreateAPI.as_view(), name='tarifa-list-create'),  # Listar y crear tarifas
     path('tarifas/<int:pk>/', TarifaDetailAPI.as_view(), name='tarifa-detail'),   # Detalle, actualización y eliminación de tarifas
     path('cuentas/', CuentaPorCobrarListAPI.as_view(), name='cuenta-list'),       # Listar cuentas por cobrar

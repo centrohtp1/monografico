@@ -3,7 +3,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import Seccion, Tarifa, CuentaPorCobrar, Factura
 from secciones.models import  SeccionEstudiante
-
+from django.db.models import Sum
 from .serializers import CuentaPorCobrarSerializer
 from estudiantes.models import Estudiante
 from dateutil.relativedelta import relativedelta
@@ -191,6 +191,26 @@ def listar_facturas_api(request):
         return Response({
             'facturas_pagadas': pagadas_serializer.data,
             'facturas_no_pagadas': no_pagadas_serializer.data,
+        }, status=status.HTTP_200_OK)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+@api_view(['GET'])
+def resumen_facturas_api(request):
+    try:
+        # Obtener el monto total de facturas pagadas y no pagadas
+        total_pagado = CuentaPorCobrar.objects.filter(estado="pagado").aggregate(Sum('monto'))['monto__sum'] or 0
+        total_no_pagado = CuentaPorCobrar.objects.filter(estado="Pendiente").aggregate(Sum('monto'))['monto__sum'] or 0
+
+        return Response({
+            'monto_pagado': total_pagado,
+            'monto_no_pagado': total_no_pagado,
         }, status=status.HTTP_200_OK)
 
     except Exception as e:

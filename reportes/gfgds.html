@@ -8,26 +8,130 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+  
+      <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Flatpickr para el calendario -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    
+    <!-- Cargar jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
+     <style>
+     
+        .swal2-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #007bff;
+        }
+        .swal2-popup {
+            padding: 20px;
+        }
+
+        /* Estilos personalizados para los botones */
+        .report-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .report-button:hover {
+            background-color: #0056b3;
+        }
+
+        .report-button i {
+            margin-right: 8px;
+        }
+
+        /* Estilos para la tabla del reporte */
+        .styled-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        .styled-table th {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .styled-table td {
+            background-color: #f9f9f9;
+        }
+
+        /* Flatpickr (calendario) personalizado */
+        .flatpickr-calendar {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .flatpickr-months {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .flatpickr-day:hover {
+            background-color: #007bff;
+            color: white;
+        }
+        .flatpickr-day.selected {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+  
 <body>
-    <div style="text-align: center; margin-top: 50px;">
+     <div style="text-align: center; margin-top: 50px;">
         <h1>Generar Reportes</h1>
-        <!-- Botones para los diferentes reportes -->
         <div style="margin-top: 20px;">
-            <button class="report-button" data-report="estudiantes" style="padding: 10px 20px; font-size: 16px;">Reporte de Estudiantes</button>
-            <button class="report-button" data-report="secciones" style="padding: 10px 20px; font-size: 16px;">Reporte de Secciones</button>
-            <button class="report-button" data-report="cursos" style="padding: 10px 20px; font-size: 16px;">Reporte de Cursos</button>
-            <button class="report-button" data-report="profesores" style="padding: 10px 20px; font-size: 16px;">Reporte de Profesores</button>
-            <button class="report-button" data-report="facturas" style="padding: 10px 20px; font-size: 16px;">Reporte de Facturas</button>
-            <button class="report-button" data-report="tarifas" style="padding: 10px 20px; font-size: 16px;">Reporte de Tarifas</button>
-            <button class="report-button" data-report="AnioEscolar" style="padding: 10px 20px; font-size: 16px;">Reporte de anio</button>
-      
+            <button class="report-button" data-report="estudiantes">
+                <i class="fas fa-users"></i> Reporte de Estudiantes
+            </button>
+            <button class="report-button" data-report="secciones">
+                <i class="fas fa-layer-group"></i> Reporte de Secciones
+            </button>
+            <button class="report-button" data-report="cursos">
+                <i class="fas fa-book"></i> Reporte de Cursos
+            </button>
+            <button class="report-button" data-report="profesores">
+                <i class="fas fa-chalkboard-teacher"></i> Reporte de Profesores
+            </button>
+            <button class="report-button" data-report="facturas">
+                <i class="fas fa-file-invoice"></i> Reporte de Facturas
+            </button>
+            <button class="report-button" data-report="tarifas">
+                <i class="fas fa-dollar-sign"></i> Reporte de Tarifas
+            </button>
+            <button class="report-button" data-report="anios">
+                <i class="fas fa-calendar-alt"></i> Reporte de Años
+            </button>
         </div>
     </div>
 
     <!-- Sección para mostrar los reportes -->
-    <div id="report-section" style="display: none; padding: 20px; margin-top: 30px; border: 1px solid #ccc; border-radius: 8px;">
+    <div id="report-section" style="display: none; padding: 20px; margin-top: 30px; border: 1px solid #ccc; border-radius: 8px;">  <div style="display: flex; justify-content: space-between; align-items: center;">
         <h2 id="report-title">Reporte</h2>
+        <button id="print-button" class="report-button" style="padding: 10px 20px; font-size: 16px;">
+            <i class="fas fa-print"></i> Imprimir
+        </button>
+    </div>
         <table class="styled-table" style="width: 100%; border-collapse: collapse;">
             <thead>
                 <tr id="table-headers">
@@ -38,6 +142,8 @@
                 <!-- Filas dinámicas -->
             </tbody>
         </table>
+        <!-- Botón de impresión -->
+      
     </div>
 
     <iframe id="pdf-viewer" style="width: 100%; height: 600px; border: none;"></iframe>
@@ -48,15 +154,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             // Configuración base de las URLs para cada reporte
             const reportUrls = {
-    estudiantes: 'https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/',
-    secciones: 'https://web-production-3f4f.up.railway.app/reporte/reporte-secciones/',
-    cursos: 'https://web-production-3f4f.up.railway.app/reporte/reporte-cursos/',
-    profesores: 'https://web-production-3f4f.up.railway.app/reporte/reporte-profesores/',
-    facturas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-facturas/',
-    tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
-    anio: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/',  // Verifica esta URL
-};
-
+                estudiantes: 'https://web-production-3f4f.up.railway.app/reporte/reporte-estudiantes/',
+                secciones: 'https://web-production-3f4f.up.railway.app/reporte/reportes-secciones/',
+                cursos: 'https://web-production-3f4f.up.railway.app/reporte/reportes-cursos/',
+                profesores: 'https://web-production-3f4f.up.railway.app/reporte/reportes-profesores/',
+                facturas: 'https://web-production-3f4f.up.railway.app/reporte/reportes-facturas/',
+                tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reportes-tarifas/',
+                anios: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/',  // Verifica esta URL
+            };
 
             // Evento para cada botón de reporte
             document.querySelectorAll('.report-button').forEach(button => {
@@ -67,9 +172,31 @@
                     const result = await Swal.fire({
                         title: 'Selecciona el rango de fechas',
                         html: `  
-                            <input type="date" id="fechaInicio" class="swal2-input" placeholder="Fecha de inicio">
-                            <input type="date" id="fechaFin" class="swal2-input" placeholder="Fecha de fin">
+                      <div>
+  <label for="fechaInicio">Desde</label>
+  <input type="date" id="fechaInicio" class="swal2-input">
+</div>
+
+<div>
+  <label for="fechaFin">Hasta</label>
+  <input type="date" id="fechaFin" class="swal2-input">
+</div>
+
+
                         `,
+
+                        focusConfirm: false,
+                        showCancelButton: true,
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonText: 'Generar Reporte',
+                        confirmButtonColor: '#4CAF50',
+                        cancelButtonColor: '#FF6347',
+                        background: '#f9f9f9',
+                        icon: 'question',
+                        iconColor: '#007bff',
+                        padding: '15px',
+                        color: '#333',
+                        backdrop: true,
                         focusConfirm: false,
                         preConfirm: () => {
                             const fechaInicio = document.getElementById('fechaInicio').value;
@@ -118,17 +245,17 @@
                     profesores: 'Reporte de Profesores',
                     facturas: 'Reporte de Facturas',
                     tarifas: 'Reporte de Tarifas',
-                    anio: 'Reporte de anios escolares',
+                    anios: 'Reporte de anios escolares',
                 };
 
                 const headers = {
-                    estudiantes: ['Matricula', 'Nombre', 'Apellido', 'Fecha de Ingreso'],
+                    estudiantes: ['Matricula', 'Nombre', 'Apellido', 'Fecha_Ingreso'],
                     secciones: ['ID', 'Nombre', 'Descripción'],
                     cursos: ['ID', 'Nombre del Curso', 'Duración'],
                     profesores: ['ID', 'Nombre', 'Especialidad'],
                     facturas: ['ID', 'Cliente', 'Monto', 'Fecha'],
                     tarifas: ['ID', 'Concepto', 'Costo'],
-                    anio: ['ID', 'nombre', 'activo','fecha_ingreso' ],
+                    anios: ['ID', 'nombre', 'activo','fecha_ingreso' ],
                 };
 
                 const tbody = document.getElementById('table-body');
@@ -163,6 +290,26 @@
 
                 // Mostrar la tabla
                 reportSection.style.display = 'block';
+
+                // Mostrar botón de impresión
+                const printButton = document.getElementById('print-button');
+                printButton.style.display = 'inline-block';
+
+                // Evento de impresión
+                printButton.addEventListener('click', () => {
+                    // Crear una nueva ventana
+                    const printWindow = window.open('', '', 'height=600,width=800');
+                    const content = document.getElementById('report-section').innerHTML;
+                    
+                    // Inyectar solo la tabla en la nueva ventana
+                    printWindow.document.write('<html><head><title>Imprimir Reporte</title></head><body>');
+                    printWindow.document.write(content);
+                    printWindow.document.write('</body></html>');
+
+                    // Imprimir la ventana
+                    printWindow.document.close(); // necesario para IE
+                    printWindow.print();
+                });
             }
         });
     </script>

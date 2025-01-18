@@ -102,16 +102,16 @@ def get_profesores(request):
             return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
 
         # Filtrar los años escolares dentro del rango de fechas
-        anios = Profesor.objects.filter(fecha_contratacion__range=(desde, hasta))
+        profesores = Profesor.objects.filter(fecha_contratacion__range=(desde, hasta))
 
         # Verificar si hay algún registro con la fecha actual
         anos_escolares_actual = Profesor.objects.filter(fecha_contratacion=fecha_actual)
 
         # Combinar los resultados (sin duplicados)
-        anios = anios | anos_escolares_actual
+        profesores = profesores | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(anios.values('id', 'nombre', 'apellido', 'especialidad','telefono'))
+        estudiantes_data = list(profesores.values('id', 'nombre', 'apellido', 'especialidad','telefono'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'anios': estudiantes_data}, status=200)
@@ -138,16 +138,16 @@ def get_cursos(request):
             return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
 
         # Filtrar los años escolares dentro del rango de fechas
-        anios = Curso.objects.filter(fecha_creacion__range=(desde, hasta))
+        cursos = Curso.objects.filter(fecha_creacion__range=(desde, hasta))
 
         # Verificar si hay algún registro con la fecha actual
         anos_escolares_actual = Curso.objects.filter(fecha_creacion=fecha_actual)
 
         # Combinar los resultados (sin duplicados)
-        anios = anios | anos_escolares_actual
+        cursos = cursos | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(anios.values('id', 'nombre', 'descripcion', 'profesores'))
+        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion', 'profesores'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'anios': estudiantes_data}, status=200)
@@ -175,16 +175,16 @@ def get_secciones(request):
             return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
 
         # Filtrar los años escolares dentro del rango de fechas
-        anios = Seccion.objects.filter(fecha_inicio__range=(desde, hasta))
+        secciones = Seccion.objects.filter(fecha_inicio__range=(desde, hasta))
 
         # Verificar si hay algún registro con la fecha actual
         anos_escolares_actual = Seccion.objects.filter(fecha_inicio=fecha_actual)
 
         # Combinar los resultados (sin duplicados)
-        anios = anios | anos_escolares_actual
+        secciones = secciones | anos_escolares_actual
 
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(anios.values('id', 'nombre', 'curso', 'fecha_inicio', 'fecha_termino'))
+        estudiantes_data = list(secciones.values('id', 'nombre', 'curso', 'fecha_inicio', 'fecha_termino'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'anios': estudiantes_data}, status=200)

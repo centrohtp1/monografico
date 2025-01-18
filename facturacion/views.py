@@ -224,3 +224,32 @@ def resumen_facturas_api(request):
     except Exception as e:
         # En caso de error, retornar un mensaje de error genérico
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+from django.http import JsonResponse
+
+from profesores.models import  Profesor
+from rest_framework.decorators import api_view
+
+@api_view(['GET'])
+def resumen_dashboard(request):
+    try:
+        # Contar la cantidad de estudiantes inscritos
+        cantidad_estudiantes = Estudiante.objects.count()
+
+        # Contar la cantidad de secciones
+        cantidad_secciones = Seccion.objects.count()
+
+        # Contar la cantidad de profesores
+        cantidad_profesores = Profesor.objects.count()
+
+        # Responder con los datos
+        return JsonResponse({
+            'cantidad_estudiantes': cantidad_estudiantes,
+            'cantidad_secciones': cantidad_secciones,
+            'cantidad_profesores': cantidad_profesores,
+        }, status=200)
+
+    except Exception as e:
+        # En caso de error, retornar un mensaje genérico
+        return JsonResponse({'error': f'Ocurrió un error: {str(e)}'}, status=500)

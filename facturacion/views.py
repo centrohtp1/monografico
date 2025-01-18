@@ -13,7 +13,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import generics
 from django.db import transaction
 from django.utils import timezone
-
+from rest_framework.decorators import api_view
 # API para listar y crear tarifas
 class TarifaListCreateAPI(generics.ListCreateAPIView):
     queryset = Tarifa.objects.all()
@@ -198,20 +198,29 @@ def listar_facturas_api(request):
 
 
 
+from django.db import models
 
 
 
 @api_view(['GET'])
 def resumen_facturas_api(request):
     try:
-        # Obtener el monto total de facturas pagadas y no pagadas
-        total_pagado = CuentaPorCobrar.objects.filter(estado="pagado").aggregate(Sum('monto'))['monto__sum'] or 0
-        total_no_pagado = CuentaPorCobrar.objects.filter(estado="Pendiente").aggregate(Sum('monto'))['monto__sum'] or 0
+        # Obtener el monto total de facturas pagadas y no pagadas en una sola consulta
+        resumen = Factura.objects.aggregate(
+            total_pagado=Sum('total', filter=models.Q(pagado=True)),
+            total_no_pagado=Sum('total', filter=models.Q(pagado=False))
+        )
 
+        # Si no hay registros, el valor de las sumas será None, así que lo asignamos a 0
+        total_pagado = resumen['total_pagado'] if resumen['total_pagado'] is not None else 0
+        total_no_pagado = resumen['total_no_pagado'] if resumen['total_no_pagado'] is not None else 0
+
+        # Responder con los valores calculados
         return Response({
             'monto_pagado': total_pagado,
             'monto_no_pagado': total_no_pagado,
         }, status=status.HTTP_200_OK)
 
     except Exception as e:
+        # En caso de error, retornar un mensaje de error genérico
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

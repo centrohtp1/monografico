@@ -1,8 +1,10 @@
 # notificaciones/urls.py
 from django.urls import path
-from .views import NotificacionListView, MarcarComoLeidaView
+from .views import GenerarNotificacionesAPIView, NotificacionesNoLeidasView, MarcarComoLeidaView
 
 urlpatterns = [
-    path('api/notificaciones/', NotificacionListView.as_view(), name='api_listar_notificaciones'),
-    path('api/notificaciones/marcar_leida/<int:notificacion_id>/', MarcarComoLeidaView.as_view(), name='api_marcar_como_leida'),
+    path('no-leidas/', NotificacionesNoLeidasView.as_view(), name='notificaciones-no-leidas'),
+    path('marcar-como-leida/<int:pk>/', MarcarComoLeidaView.as_view(), name='marcar-como-leida'),
+       path('generar-notificaciones/', GenerarNotificacionesAPIView.as_view(), name='generar-notificaciones'),
+    
 ]

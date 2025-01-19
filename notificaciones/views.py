@@ -1,40 +1,79 @@
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from django.utils.timezone import now
+from datetime import timedelta
+from .models import Notificacion
+from secciones.models import Seccion
+from .serializers import NotificacionSerializer
+
+
+
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.utils.timezone import now
+from datetime import timedelta
 from .models import Notificacion
+from secciones.models import Seccion
 from .serializers import NotificacionSerializer
-from django.http import JsonResponse
 
-class NotificacionListView(APIView):
+class GenerarNotificacionesAPIView(APIView):
+    """
+    API para generar y guardar notificaciones basadas en secciones próximas a finalizar.
+    """
     def get(self, request):
-        # Obtener todas las notificaciones
-        notificaciones = Notificacion.objects.all().order_by('-fecha_creacion')
+        try:
+            hoy = now().date()
+            proximos_dias = hoy + timedelta(days=7)
+            secciones = Seccion.objects.filter(fecha_termino__range=(hoy, proximos_dias)).select_related('curso')
 
-        # Serializar los objetos de notificación
+            notificaciones_generadas = []
+            for seccion in secciones:
+                titulo = f"Sección {seccion.nombre} próxima a finalizar"
+                mensaje = f"La sección {seccion.nombre} del curso {seccion.curso.nombre} finalizará el {seccion.fecha_termino}."
+
+                # Crear los datos para la notificación
+                notificacion_data = {
+                    "titulo": titulo,
+                    "mensaje": mensaje,
+                    "seccion": seccion.id,  # Usamos el ID de la sección para el campo 'seccion'
+                }
+
+                # Usar el serializer para validar y crear la notificación
+                serializer = NotificacionSerializer(data=notificacion_data)
+                if serializer.is_valid():
+                    notificacion = serializer.save()  # Guardar la notificación en la base de datos
+                    notificaciones_generadas.append(serializer.data)  # Guardamos los datos serializados
+
+            return Response({
+                "mensaje": f"{len(notificaciones_generadas)} notificaciones generadas.",
+                "notificaciones": notificaciones_generadas
+            }, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response({
+                "error": f"Ocurrió un error al generar notificaciones: {str(e)}"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+
+
+
+
+class NotificacionesNoLeidasView(APIView):
+    def get(self, request):
+        notificaciones = Notificacion.objects.filter(leido=False)
         serializer = NotificacionSerializer(notificaciones, many=True)
-
-        # Retornar la respuesta en formato JSON
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-# También puedes agregar un endpoint para marcar las notificaciones como leídas.
 class MarcarComoLeidaView(APIView):
-    def post(self, request, notificacion_id):
+    def post(self, request, pk):
         try:
-            # Obtener la notificación
-            notificacion = Notificacion.objects.get(id=notificacion_id)
+            notificacion = Notificacion.objects.get(pk=pk)
             notificacion.leido = True
             notificacion.save()
-
-            return JsonResponse({'message': 'Notificación marcada como leída'}, status=status.HTTP_200_OK)
-
+            return Response({"message": "Notificación marcada como leída."}, status=status.HTTP_200_OK)
         except Notificacion.DoesNotExist:
-            return JsonResponse({'error': 'Notificación no encontrada'}, status=status.HTTP_404_NOT_FOUND)
-
-from rest_framework import serializers
-from .models import Notificacion
-
-class NotificacionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notificacion
-        fields = ['id', 'titulo', 'mensaje', 'seccion', 'fecha_creacion', 'leido']
+            return Response({"error": "Notificación no encontrada."}, status=status.HTTP_404_NOT_FOUND)

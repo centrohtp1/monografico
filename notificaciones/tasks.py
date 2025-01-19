@@ -1,11 +1,13 @@
 from celery import shared_task
-from .models import Notificacion, Secciones
+from .models import Notificacion
+from secciones.models import Seccion
 from datetime import timedelta
 from django.utils.timezone import now
 import logging
 
 # Configurar el logger para la tarea
-logger = logging.getLogger(_name_)
+logger = logging.getLogger(__name__)
+
 
 @shared_task
 def generar_notificaciones_secciones():
@@ -14,7 +16,7 @@ def generar_notificaciones_secciones():
     notificaciones = []
 
     # Optimización de la consulta
-    secciones = Secciones.objects.filter(fecha_termino__range=(hoy, proximos_dias)).select_related('grado')
+    secciones = Seccion.objects.filter(fecha_termino__range=(hoy, proximos_dias)).select_related('grado')
 
     logger.info(f"Secciones encontradas: {secciones.count()}")
 

@@ -159,7 +159,7 @@
                 cursos: 'https://web-production-3f4f.up.railway.app/reporte/reportes-cursos/',
                 profesores: 'https://web-production-3f4f.up.railway.app/reporte/reportes-profesores/',
                 facturas: 'https://web-production-3f4f.up.railway.app/reporte/reportes-facturas/',
-                tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reportes-tarifas/',
+                tarifas: 'https://web-production-3f4f.up.railway.app/reporte/reporte-tarifas/',
                 anios: 'https://web-production-3f4f.up.railway.app/reporte/reportes-anioescolar/', 
                 estudiantessecciones: 'https://web-production-3f4f.up.railway.app/reporte/reportes-estudiantes-secciones/<int:seccion_id>/',  
                 //  // Verifica esta URL
@@ -253,11 +253,11 @@
 
                 const headers = {
                     estudiantes: ['Matricula', 'Nombre', 'Apellido', 'Fecha_Ingreso'],
-                    secciones: ['ID', 'Nombre ', 'Curso', 'Fecha_inicio', 'Fecha_termino'],
+                    secciones: ['ID', 'Nombre', 'Fecha_inicio', 'Fecha_termino'],
                     cursos: ['ID', 'Nombre', 'Descripcion'],
                     profesores: ['ID', 'Nombre', 'Especialidad', 'Telefono'],
-                    facturas: ['ID', 'Cliente', 'Monto', 'Fecha'],
-                    tarifas: ['ID', 'Concepto', 'Costo'],
+                    facturas: ['estudiante__nombre', 'cuenta_por_cobrar__seccion__nombre','mes_correspondiente', 'numero_factura', 'pagado', 'total'],
+                    tarifas: ['ID', 'secciones_tarifa__nombre', 'precio'],
                     anios: ['ID', 'nombre', 'activo','fecha_ingreso' ],
                     estudiantessecciones: ['ID', 'estudiante', 'seccion','nota' ],
                 };

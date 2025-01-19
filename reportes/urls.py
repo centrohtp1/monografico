@@ -4,6 +4,8 @@ from reportes import views
 
 urlpatterns = [
     path('reporte-estudiantes/', views.get_estudiantes_report, name='get_estudiantes_report'),
+       path('reporte-tarifas/', views.get_tarifas, name='get_tarifas'),
+     path('reportes-facturas/', views.get_facturas, name='get_facturas'),
     path('reportes-anioescolar/', views.get_anos_escolares, name='get_anos_escolares'),
        path('reportes-profesores/', views.get_profesores, name='get_profesores'),
           path('reportes-cursos/', views.get_cursos, name='get_cursos'),

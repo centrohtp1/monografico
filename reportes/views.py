@@ -145,9 +145,9 @@ def get_cursos(request):
 
         # Combinar los resultados (sin duplicados)
         cursos = cursos | anos_escolares_actual
-
+        cursos = cursos.select_related('profesores')
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion', 'profesores'))
+        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion', 'profesores__nombre'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'cursos': estudiantes_data}, status=200)
@@ -182,9 +182,9 @@ def get_secciones(request):
 
         # Combinar los resultados (sin duplicados)
         secciones = secciones | anos_escolares_actual
-
+        secciones = secciones.select_related('curso')
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(secciones.values('id', 'nombre', 'curso', 'fecha_inicio', 'fecha_termino'))
+        estudiantes_data = list(secciones.values('id', 'nombre', 'curso__nombre', 'fecha_inicio', 'fecha_termino'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'secciones': estudiantes_data}, status=200)
@@ -225,3 +225,94 @@ def obtener_estudiantes_por_seccion(request, seccion_id):
     except Exception as e:
         # Si ocurre cualquier otro error, retornar un error genérico
         return JsonResponse({'error': f'Ocurrió un error: {str(e)}'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+
+
+
+@api_view(['GET'])
+def get_tarifas(request):
+    # Obtener los parámetros 'desde' y 'hasta' de la query string
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
+
+    # Obtener la fecha actual
+    fecha_actual = timezone.now().date()
+
+    # Validación de los parámetros
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
+
+        # Filtrar los años escolares dentro del rango de fechas
+        tar = Tarifa.objects.filter(fecha_creacion__range=(desde, hasta))
+
+        # Verificar si hay algún registro con la fecha actual
+        anos_escolares_actual = Tarifa.objects.filter(fecha_creacion=fecha_actual)
+
+        # Combinar los resultados (sin duplicados)
+        tar = tar | anos_escolares_actual
+        tar = tar.select_related('secciones_tarifa')
+
+        # Crear una lista con los datos de los años escolares
+        estudiantes_data = list(tar.values( 'secciones_tarifa__nombre', 'precio', 'fecha_creacion'))
+
+        # Retornar el JSON con los datos de los años escolares
+        return JsonResponse({'tarifas': estudiantes_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)
+
+
+
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.http import JsonResponse
+
+import pandas as pd
+from django.utils import timezone
+
+@api_view(['GET'])
+def get_facturas(request):
+    # Obtener los parámetros 'desde' y 'hasta' de la query string
+    desde = request.GET.get('fecha_inicio')
+    hasta = request.GET.get('fecha_fin')
+
+    # Validación de los parámetros
+    if desde and hasta:
+        try:
+            # Convertir las fechas 'desde' y 'hasta' a objetos de fecha utilizando pandas
+            desde = pd.to_datetime(desde)
+            hasta = pd.to_datetime(hasta)
+        except ValueError:
+            return JsonResponse({'error': 'Formato de fecha incorrecto'}, status=400)
+
+        # Filtrar las facturas dentro del rango de fechas
+        facturas = Factura.objects.filter(fecha_emision__range=(desde, hasta))
+
+        # Usar select_related para traer la información del estudiante y cuenta por cobrar
+        facturas = facturas.select_related('estudiante', 'cuenta_por_cobrar', 'cuenta_por_cobrar__seccion')
+
+        # Crear una lista con los datos de las facturas
+        facturas_data = list(facturas.values(
+            'numero_factura',
+            'estudiante__nombre',  # Accedemos al nombre del estudiante
+            'cuenta_por_cobrar__seccion__nombre',  # Accedemos al nombre de la sección de la cuenta por cobrar
+            'cuenta_por_cobrar__monto',  # Monto de la cuenta por cobrar
+            'cuenta_por_cobrar__estado',  # Estado de la cuenta por cobrar
+            'cuenta_por_cobrar__fecha_factura',  # Fecha de la factura asociada
+            'cuenta_por_cobrar__mes_correspondiente',  # Mes correspondiente
+            'fecha_emision',  # Fecha de emisión de la factura
+            'total',  # Total de la factura
+            'pagado',  # Si la factura ha sido pagada o no
+            'mes_correspondiente'  # Mes correspondiente a la factura
+        ))
+
+        # Retornar el JSON con los datos de las facturas
+        return JsonResponse({'facturas': facturas_data}, status=200)
+    
+    else:
+        return JsonResponse({'error': 'Por favor proporciona las fechas "desde" y "hasta"'}, status=400)

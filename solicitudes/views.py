@@ -40,3 +40,17 @@ class RegistrationDetailAPIView(APIView):
             return Response({
                 "message": "Registro no encontrado"
             }, status=status.HTTP_404_NOT_FOUND)
+        
+
+class RegistrationDeleteAPIView(APIView):
+    def delete(self, request, pk, *args, **kwargs):
+        try:
+            registration = Registration.objects.get(pk=pk)
+            registration.delete()
+            return Response({
+                "message": "Registro eliminado exitosamente"
+            }, status=status.HTTP_204_NO_CONTENT)
+        except Registration.DoesNotExist:
+            return Response({
+                "message": "Registro no encontrado"
+            }, status=status.HTTP_404_NOT_FOUND)

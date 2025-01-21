@@ -31,6 +31,11 @@ class GenerarNotificacionesAPIView(APIView):
 
             notificaciones_generadas = []
             for seccion in secciones:
+                # Verificar si ya existe una notificación para esta sección
+                if Notificacion.objects.filter(seccion=seccion, leida=False).exists():
+                    # Si existe, no crear una nueva
+                    continue
+
                 titulo = f"Sección {seccion.nombre} próxima a finalizar"
                 mensaje = f"La sección {seccion.nombre} del curso {seccion.curso.nombre} finalizará el {seccion.fecha_termino}."
 

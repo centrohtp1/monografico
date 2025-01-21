@@ -40,9 +40,10 @@ urlpatterns = [
   
     path('admin/', admin.site.urls),
      path('profesores/', include('profesores.urls')),  # API para "profesores"
+      path('solicitudes/', include('solicitudes.urls')),  # API para "profesores"
     path('estudiantes/', include('estudiantes.urls')),  # API para "estudiantes"
       path('cursos/', include('Cursos.urls')),  # API para "estudiantes"
-     
+             path('contactanos/', include('contactanos.urls')),  # API para "secciones"
          path('usuarios/', include('usuarioshtp.urls')),  
          path('anioescolar/', include('anio_escolar.urls')),  # API para "secciones"
          path('reporte/', include('reportes.urls')),  # Incluir las URLs de la app "facturacion"

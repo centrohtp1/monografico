@@ -1,6 +1,9 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+
+from contactanos.models import Contacto
+from solicitudes.models import Registration
 from .models import Seccion, Tarifa, CuentaPorCobrar, Factura
 from secciones.models import  SeccionEstudiante
 from django.db.models import Sum
@@ -221,6 +224,12 @@ def resumen_facturas_api(request):
         # Contar la cantidad de secciones
         cantidad_secciones = Seccion.objects.count()
 
+            # Contar la cantidad de solicitudes
+        cantidad_solicitudes = Registration.objects.count()
+
+        # Contar la cantidad de contactanos
+        cantidad_contactanos = Contacto.objects.count()
+
         # Contar la cantidad de profesores
         cantidad_profesores = Profesor.objects.count()
         # Si no hay registros, el valor de las sumas será None, así que lo asignamos a 0
@@ -234,6 +243,8 @@ def resumen_facturas_api(request):
             'cantidad_estudiantes': cantidad_estudiantes,
             'cantidad_secciones': cantidad_secciones,
             'cantidad_profesores': cantidad_profesores,
+            'cantidad_solicitudes': cantidad_solicitudes,  # Agregado
+            'cantidad_contactanos': cantidad_contactanos,  # Agregado
         }, status=status.HTTP_200_OK)
 
     except Exception as e:

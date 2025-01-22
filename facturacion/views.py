@@ -54,6 +54,9 @@ from django.utils import timezone
 
 from decimal import Decimal, ROUND_DOWN
 
+from decimal import Decimal, ROUND_DOWN
+from datetime import timedelta
+
 @api_view(['POST'])
 def generar_cuentas_api(request):
     mensajes_exito = []
@@ -80,7 +83,10 @@ def generar_cuentas_api(request):
                     continue
 
                 # Calcular la duración en meses de la sección
-                meses_duracion = (relativedelta( seccion.fecha_inicio, seccion.fecha_termino)).months
+                delta_dias = (seccion.fecha_termino - seccion.fecha_inicio).days
+                meses_duracion = delta_dias / 30  # Dividir entre 30 para obtener meses aproximados
+                meses_duracion = round(meses_duracion)  # Redondeamos al mes más cercano
+
                 if meses_duracion <= 0:
                     mensajes_error.append(f"La duración de la sección {seccion.id} es inválida (menos de un mes).")
                     continue

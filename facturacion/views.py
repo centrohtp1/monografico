@@ -80,7 +80,7 @@ def generar_cuentas_api(request):
                     continue
 
                 # Calcular la duración en meses de la sección
-                meses_duracion = (relativedelta(seccion.fecha_termino, seccion.fecha_inicio)).months
+                meses_duracion = (relativedelta( seccion.fecha_inicio, seccion.fecha_termino)).months
                 if meses_duracion <= 0:
                     mensajes_error.append(f"La duración de la sección {seccion.id} es inválida (menos de un mes).")
                     continue

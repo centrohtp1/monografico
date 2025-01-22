@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Cuentas por Cobrar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" charset="utf8"
+        src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+    <div class="container mt-5">
+        <h2>Lista de Cuentas por Cobrar</h2>
+        <button class="btn btn-primary mb-3" id="generarFacturasBtn">
+            <i class="fas fa-file-invoice"></i> Generar Facturas
+        </button>
+
+        <table class="table" id="cuentasTable">
+            <thead>
+                <tr>
+                    <th>Matricula</th>
+                    <th>Estudiante</th>
+                    <th>Apellido</th>
+
+                    <th>Sección</th>
+                    <th>Monto</th>
+                    <th>Fecha Factura</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+            <tfoot>
+                <tr>
+                    <th colspan="4" style="text-align:right;">Total: RD$</th>
+                    <th id="totalMonto">0.00</th>
+                    <th colspan="3"></th>
+                </tr>
+            </tfoot>
+        </table>
+    </div>
+
+    <!-- Modal para Pagar Factura -->
+    <div class="modal fade" id="pagarFacturaModal" tabindex="-1" aria-labelledby="pagarFacturaModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pagarFacturaModalLabel">Detalles de la Factura</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Estudiante:</strong> <span id="modalEstudiante"></span></p>
+                    <p><strong>Monto:</strong> RD$<span id="modalMonto"></span></p>
+                    <p><strong>Fecha de Emision Factura:</strong> <span id="modalFechaFactura"></span></p>
+                    <p><strong>Mes Correspondiente:</strong> <span id="modalFechaFactura2"></span></p>
+                    <p><strong>Número de Factura:</strong> <span id="modalNumeroFactura"></span></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times"></i> Cerrar
+                    </button>
+                    <button type="button" class="btn btn-primary" id="realizarPagoBtn">
+                        <i class="fas fa-credit-card"></i> Realizar Pago
+                    </button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+
+
+    
+
+            // Inicializar DataTable
+         
+            // Inicializar DataTable
+         
+            $(document).ready(function () {
+    // Inicializar DataTable
+    let table = $('#cuentasTable').DataTable();
+
+    // Llamar a la función modular para actualizar el total
+    actualizarTotal(table, 4, '#totalMonto'); // Índice 4 = quinta columna (base 0)
+
+    // Al cambiar filtros, paginación o búsquedas
+    $('#cuentasTable').on('draw.dt', function () {
+        actualizarTotal(table, 4, '#totalMonto'); // Actualizar total después de redibujar la tabla
+    });
+
+    // Aquí puedes llamar a tu función `cargarCuentas` si es necesario
+    cargarCuentas(function () {
+        actualizarTotal(table, 4, '#totalMonto'); // Actualizar el total después de cargar datos
+    });
+});
+
+// Función modular para calcular el total
+function actualizarTotal(table, columnIndex, totalElementId) {
+    // Sumar los valores de la columna especificada
+    let total = table
+        .column(columnIndex, { page: 'current' }) // Filtra solo las filas visibles en la página actual
+        .data() // Obtén los datos de esa columna
+        .reduce(function (sum, value) {
+            // Limpia el valor y conviértelo a número
+            let monto = parseFloat(value.replace(/[^0-9.-]/g, '')) || 0;
+            return sum + monto; // Suma el valor
+        }, 0);
+
+    // Actualizar el total en el elemento correspondiente
+    $(totalElementId).text(
+        total.toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    );
+}
+
+// Llamar a `actualizarTotal` después de cargar los datos
+function cargarCuentas(callback) {
+    fetch('https://web-production-3f4f.up.railway.app/facturacion/cuentas/', {
+        method: 'GET',
+        headers: {
+            // 'Authorization': `Token ${token}`
+        }
+    })
+        .then(response => response.json())
+        .then(cuentas => {
+            const cuentasPendientes = cuentas.filter(cuenta => cuenta.estado.toLowerCase() !== 'pagado');
+            
+            // Actualizar la tabla con DataTables API
+            const table = $('#cuentasTable').DataTable();
+            table.clear();
+            cuentasPendientes.forEach(cuenta => {
+                const facturasHtml = cuenta.facturas.map(factura => `
+                    <button class="btn btn-info btn-sm" onclick="mostrarDetalles(${cuenta.id}, ${factura.id})">
+                        <i class="fas fa-credit-card"></i> Pagar ${factura.numero_factura}
+                    </button>
+                `).join('');
+                
+                table.row.add([
+                    cuenta.estudiante_matricula,
+                    cuenta.estudiante_nombre,
+                    cuenta.estudiante_apellidos,
+                    cuenta.seccion_nombre,
+                    Number(cuenta.monto).toLocaleString('es-DO', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+                    cuenta.fecha_factura,
+                    cuenta.estado,
+                    facturasHtml
+                ]);
+            });
+            table.draw();
+
+            if (callback) callback();
+        })
+        .catch(error => {
+            console.error('Error al cargar las cuentas:', error);
+        });
+}
+
+
+
+        // Mostrar detalles de la factura en el modal
+        function mostrarDetalles(cuentaId, facturaId) {
+
+            // const token = sessionStorage.getItem('authToken');  // Obtener el token desde sessionStorage
+            // Llamar a la API para obtener los detalles de la factura
+            fetch(`https://web-production-3f4f.up.railway.app/facturacion/factura_detalle/${cuentaId}/${facturaId}/`, {
+                method: 'GET',
+                headers: {
+                    //'Authorization': `Token ${token}` 
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Actualizar el modal con los detalles de la factura y estudiante
+                    document.getElementById('modalEstudiante').textContent = `${data.estudiante.nombre} ${data.estudiante.apellido}`;
+                    const total = data.factura.total;
+
+                    // Formatear el monto con separadores de miles y dos decimales
+                    const totalFormateado = total.toLocaleString('es-US', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                    });
+
+                    // Insertar el monto formateado en el elemento con id 'modalMonto'
+                    document.getElementById('modalMonto').textContent = totalFormateado;
+                    document.getElementById('modalFechaFactura').textContent = data.factura.fecha_emision;
+                    // Supongamos que data.factura.mes_correspondiente contiene el número del mes (1 para Enero, 2 para Febrero, etc.)
+                    const mesCorrespondiente = data.factura.mes_correspondiente;
+
+                    // Array con los nombres de los meses
+                    const meses = [
+                        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+                    ];
+
+                    // Obtener el nombre del mes (restar 1 porque los arrays empiezan en 0)
+                    const nombreMes = meses[mesCorrespondiente - 1];
+
+                    // Insertar el nombre del mes en el elemento con id 'modalFechaFactura2'
+                    document.getElementById('modalFechaFactura2').textContent = nombreMes;
+
+                    document.getElementById('modalNumeroFactura').textContent = data.factura.numero_factura;
+
+                    // Mostrar el modal
+                    $('#pagarFacturaModal').modal('show');
+
+                    // Asignar la función al botón "Realizar Pago"
+                    document.getElementById('realizarPagoBtn').onclick = function () {
+                        realizarPago(cuentaId, facturaId);
+                    };
+                })
+                .catch(error => {
+                    console.error('Error al obtener los detalles de la factura:', error);
+                });
+        }
+        // Realizar pago
+        function realizarPago(cuentaId, facturaId) {
+
+            fetch(`https://web-production-3f4f.up.railway.app/facturacion/cuentas/pagar/${cuentaId}/${facturaId}/`, {
+                method: 'POST',
+                headers: {
+                    //   'Authorization': `Token ${token}` 
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    Swal.fire({
+                        title: '¡Éxito!',
+                        text: 'La factura ha sido pagada correctamente.',
+                        icon: 'success',
+                        showCancelButton: true,
+                        confirmButtonText: 'Cerrar',
+                        cancelButtonText: 'Imprimir',
+                    }).then((result) => {
+                        if (result.isDismissed) {
+                            // Si el usuario hace clic en "Imprimir"
+                            imprimirFactura(cuentaId, facturaId);
+                        }
+                    });
+                    $('#pagarFacturaModal').modal('hide'); // Cerrar el modal
+                    cargarCuentas(); // Recargar las cuentas
+                })
+                .catch(error => {
+                    console.error('Error al pagar la factura:', error);
+                    Swal.fire('Error', 'Hubo un problema al procesar el pago de la factura.', 'error');
+                });
+        }
+
+
+
+        const meses = [
+            "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+            "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+        ];
+        // Función para imprimir la factura
+        function imprimirFactura(cuentaId, facturaId) {
+            // Llamamos a la API para obtener los detalles de la factura
+            fetch(`https://web-production-3f4f.up.railway.app/facturacion/factura_detalle/${cuentaId}/${facturaId}/`, {
+                method: 'GET',
+                headers: {
+                    // 'Authorization': `Token ${token}`  // Descomenta si necesitas autenticación
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    // Crear un nuevo contenido HTML para la factura
+              const contenidoFactura = `
+    <html>
+        <head>
+            <title>Factura #${data.factura.numero_factura}</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    margin: 0;
+                    padding: 0;
+                    background-color: #f4f4f4;
+                    color: #333;
+                }
+                .factura-container {
+                    width: 80%;
+                    margin: 20px auto;
+                    padding: 20px;
+                    background-color: #fff;
+                    border-radius: 8px;
+                    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                }
+                .factura-header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: flex-start;
+                    border-bottom: 2px solid #ddd;
+                    padding-bottom: 15px;
+                    margin-bottom: 20px;
+                }
+                .factura-header .info-negocio {
+                    width: 50%;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                .factura-header .info-factura {
+                    text-align: right;
+                    width: 40%;
+                    font-size: 16px;
+                    line-height: 1.6;
+                }
+                .factura-header h1 {
+                    font-size: 24px;
+                    color: #0073e6;
+                    margin: 0;
+                }
+                .factura-details {
+                    margin-bottom: 20px;
+                    font-size: 16px;
+                }
+                .factura-details p {
+                    margin: 5px 0;
+                }
+                .factura-footer {
+                    text-align: center;
+                    margin-top: 30px;
+                    font-size: 14px;
+                    color: #777;
+                }
+                .total {
+                    font-size: 18px;
+                    font-weight: bold;
+                    color: #2a9d8f;
+                    text-align: right;
+                }
+                .estado {
+                    color: ${data.factura.pagado ? '#2a9d8f' : '#e76f51'};
+                    font-weight: bold;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="factura-container">
+                <!-- Encabezado con información del negocio -->
+                <div class="factura-header">
+                    <div class="info-negocio">
+                        <h1>Centro Educativo HTP</h1>
+                        <p><strong>Dirección:</strong> Calle : # 123, San Pedro de Macoris, Rep. Dom.</p>
+                        <p><strong>Teléfono:</strong> +1 234 567 890</p>
+                        <p><strong>Correo:</strong> contacto@empresa.com</p>
+                    </div>
+                    <div class="info-factura">
+                        <p><strong>Fecha de emisión:</strong> ${data.factura.fecha_emision}</p>
+                        <p><strong>Factura #:</strong> ${data.factura.numero_factura}</p>
+                    </div>
+                </div>
+
+                <!-- Detalles de la factura -->
+                <div class="factura-details">
+                    <p><strong>Estudiante:</strong> ${data.estudiante.nombre} ${data.estudiante.apellido}</p>
+                    <p><strong>Estado:</strong> <span class="estado">${data.factura.pagado ? 'Pagado' : 'No Pagado'}</span></p>
+                    <p><strong>Monto Total:</strong> RD$${data.factura.total.toLocaleString('es-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                    <p><strong>Mes Correspondiente:</strong> ${meses[data.factura.mes_correspondiente - 1]}</p>
+                </div>
+
+                <!-- Total a pagar -->
+                <div class="total">
+                    <p>Total a Pagar: RD$${data.factura.total.toLocaleString('es-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</p>
+                </div>
+
+                <!-- Pie de página -->
+                <div class="factura-footer">
+                    <p>Gracias por su preferencia. Para más detalles, comuníquese con nosotros.</p>
+                    <p>Este es un documento oficial generado electrónicamente.</p>
+                </div>
+            </div>
+        </body>
+    </html>
+`;
+
+
+
+                    // Crear una ventana de impresión
+                    const ventanaImpresion = window.open('', '', 'width=800, height=600');
+                    ventanaImpresion.document.write('<html><head><title>Factura</title></head><body>');
+                    ventanaImpresion.document.write(contenidoFactura);
+                    ventanaImpresion.document.write('</body></html>');
+                    ventanaImpresion.document.close();
+                    ventanaImpresion.print();
+                })
+                .catch(error => {
+                    console.error('Error al obtener los detalles de la factura:', error);
+                    Swal.fire('Error', 'Hubo un problema al generar la factura para imprimir.', 'error');
+                });
+        }
+
+
+
+
+        document.getElementById('generarFacturasBtn').addEventListener('click', function () {
+            fetch('https://web-production-3f4f.up.railway.app/facturacion/cuentas/generar/', {
+                method: 'POST',
+                headers: {
+                    // 'Authorization': `Token ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.warning) {
+                        Swal.fire('Advertencia', data.warning, 'warning');
+                    } else if (data.success) {
+                        Swal.fire('¡Éxito!', data.success, 'success');
+                        cargarCuentas(); // Recargar las cuentas
+                    } else {
+                        Swal.fire('Información', 'Operación completada pero sin mensaje adicional.', 'info');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error al generar las facturas:', error);
+                    Swal.fire('Error', 'Hubo un problema al generar las facturas.', 'error');
+                });
+        });
+
+        // Cargar cuentas al iniciar la página
+        window.onload = cargarCuentas;
+    </script>
+
+</body>
+
+</html>

@@ -52,6 +52,8 @@ from rest_framework.decorators import api_view
 from rest_framework import status
 from django.utils import timezone
 
+from decimal import Decimal, ROUND_DOWN
+
 @api_view(['POST'])
 def generar_cuentas_api(request):
     mensajes_exito = []
@@ -83,15 +85,25 @@ def generar_cuentas_api(request):
                     mensajes_error.append(f"La duración de la sección {seccion.id} es inválida (menos de un mes).")
                     continue
 
-                monto_total = tarifa.precio
+                monto_total = Decimal(tarifa.precio)
                 monto_por_mes = monto_total / meses_duracion
+
+                # Redondear el monto por mes a 2 decimales
+                monto_por_mes = monto_por_mes.quantize(Decimal('0.01'), rounding=ROUND_DOWN)
+
+                # Asegurarse de que la suma total no exceda el monto total
+                total_calculado = monto_por_mes * meses_duracion
+                diferencia = monto_total - total_calculado
+                if diferencia > 0:
+                    # Si hay diferencia debido al redondeo, añadirla al último mes
+                    monto_por_mes_ultimo = monto_por_mes + diferencia
 
                 for estudiante in estudiantes:
                     cuenta_existente = CuentaPorCobrar.objects.filter(estudiante=estudiante, seccion=seccion).exists()
 
                     if not cuenta_existente:
                         fecha_actual = seccion.fecha_inicio
-                        while fecha_actual <= seccion.fecha_termino:
+                        for i in range(meses_duracion):
                             # Crear cuenta por cobrar
                             cuenta_por_cobrar = CuentaPorCobrar(
                                 estudiante=estudiante,
@@ -119,6 +131,18 @@ def generar_cuentas_api(request):
                             # Incrementar un mes
                             fecha_actual += relativedelta(months=1)
 
+                        # Si hay diferencia en el último mes, corregirlo
+                        if diferencia > 0:
+                            cuenta_por_cobrar_ultimo = CuentaPorCobrar.objects.filter(estudiante=estudiante, seccion=seccion, mes_correspondiente=fecha_actual.month).first()
+                            cuenta_por_cobrar_ultimo.monto = monto_por_mes_ultimo
+                            cuenta_por_cobrar_ultimo.save()
+
+                            # También la factura
+                            factura_ultimo = Factura.objects.filter(cuenta_por_cobrar=cuenta_por_cobrar_ultimo).first()
+                            factura_ultimo.total = monto_por_mes_ultimo
+                            factura_ultimo.save()
+                            mensajes_exito.append(f"Factura ajustada para estudiante: {estudiante.id} en sección: {seccion.id}, último mes.")
+
         if mensajes_exito:
             return Response({"success": "\n".join(mensajes_exito)}, status=status.HTTP_201_CREATED)
         if mensajes_error:
@@ -127,6 +151,7 @@ def generar_cuentas_api(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 
 # API para pagar factura

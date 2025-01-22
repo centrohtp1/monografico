@@ -122,7 +122,6 @@
   
   
   
-  
   <!-- Modal de Edición de Sección -->
 <div class="modal fade" id="modalEditarSeccion" tabindex="-1" aria-labelledby="modalEditarSeccionLabel" aria-hidden="true">
     <div class="modal-dialog">
@@ -158,9 +157,10 @@
                             <!-- Opciones de profesores -->
                         </select>
                     </div>
+                    <!-- Campo Pagado -->
                     <div class="mb-3 form-check" style="display: none;">
-                        <input type="checkbox" class="form-check-input" id="pagadoSeccionCrear">
-                        <label class="form-check-label" for="pagadoSeccionCrear">Pagado</label>
+                        <input type="checkbox" class="form-check-input" id="pagadoSeccion">
+                        <label class="form-check-label" for="pagadoSeccion">Pagado</label>
                     </div>
                 </form>
             </div>
@@ -486,61 +486,57 @@ function cargarSecciones() {
 }
     
  // Función para cargar la sección en el formulario de edición
-function cargarSeccion(seccionId) {
+ function cargarSeccion(seccionId) {
+    fetch(`https://web-production-3f4f.up.railway.app/secciones/secciones/obt/${seccionId}/`, {
+        method: 'GET',  
+        headers: {
+            // 'Authorization': `Token ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error al obtener la sección');
+        }
+        return response.json();
+    })
+    .then(seccion => {
+        if (!seccion || !seccion.nombre) {
+            throw new Error('Datos de sección incompletos');
+        }
 
+        document.getElementById("nombreSeccion").value = seccion.nombre;
+        document.getElementById("fechaInicio").value = seccion.fecha_inicio.split('T')[0];
+        document.getElementById("fechaTermino").value = seccion.fecha_termino.split('T')[0];
 
-  // Realizamos la solicitud fetch con el token en los headers
-  fetch(`https://web-production-3f4f.up.railway.app/secciones/secciones/obt/${seccionId}/`, {
-      method: 'GET',  // Aseguramos que la solicitud sea GET
-      headers: {
-        //  'Authorization': `Token ${token}`  // Agregamos el token en los encabezados
-      }
-  })
-  .then(response => {
-      if (!response.ok) {
-          throw new Error('Error al obtener la sección');
-      }
-      return response.json();  // Procesamos el JSON si la respuesta es correcta
-  })
-  .then(seccion => {
-      // Asegurarnos de que los datos de la sección estén completos
-      if (!seccion || !seccion.nombre) {
-          throw new Error('Datos de sección incompletos');
-      }
+        // Establecer el curso seleccionado
+        const cursoSelect = document.getElementById('cursoSeccion');
+        for (let i = 0; i < cursoSelect.options.length; i++) {
+            if (cursoSelect.options[i].value === String(seccion.curso.id)) {
+                cursoSelect.selectedIndex = i;
+                break;
+            }
+        }
 
-      // Llenamos el formulario con los datos de la sección
-      document.getElementById("nombreSeccion").value = seccion.nombre;
-      document.getElementById("fechaInicio").value = seccion.fecha_inicio.split('T')[0];  // Asegúrate que sea una fecha válida
-      document.getElementById("fechaTermino").value = seccion.fecha_termino.split('T')[0];  // Asegúrate que sea una fecha válida
+        // Establecer el profesor seleccionado
+        const profesorSelect = document.getElementById('profesorSeccion');
+        for (let i = 0; i < profesorSelect.options.length; i++) {
+            if (profesorSelect.options[i].value === String(seccion.profesor.id)) {
+                profesorSelect.selectedIndex = i;
+                break;
+            }
+        }
 
-      // Establecer el curso seleccionado en el formulario de edición
-      const cursoSelect = document.getElementById('cursoSeccion');
-      for (let i = 0; i < cursoSelect.options.length; i++) {
-          if (cursoSelect.options[i].value == seccion.curso.id) {
-              cursoSelect.selectedIndex = i;
-              break;
-          }
-      }
+        // Establecer el estado del checkbox "pagado"
+        document.getElementById("pagadoSeccion").checked = seccion.pagado;
 
-      const profesorSelect = document.getElementById('profesorSeccion');
-      for (let i = 0; i < profesorSelect.options.length; i++) {
-          if (profesorSelect.options[i].value == seccion.profesor.id) {
-            profesorSelect.selectedIndex = i;
-              break;
-          }
-      }
-
-      // Establecer el estado del checkbox "pagado"
-      document.getElementById("pagadoSeccion").checked = seccion.pagado;
-
-      // Mostrar el modal de edición
-      document.getElementById("guardarEdicion").setAttribute("data-id", seccionId);
-      var myModal = new bootstrap.Modal(document.getElementById('modalEditarSeccion'));
-      myModal.show();
-  })
-  .catch(error => {
-      Swal.fire('Error', error.message || 'No se pudo cargar la sección para editar.', 'error');
-  });
+        // Mostrar el modal de edición
+        document.getElementById("guardarEdicion").setAttribute("data-id", seccionId);
+        var myModal = new bootstrap.Modal(document.getElementById('modalEditarSeccion'));
+        myModal.show();
+    })
+    .catch(error => {
+        Swal.fire('Error', error.message || 'No se pudo cargar la sección para editar.', 'error');
+    });
 }
 
     

@@ -57,6 +57,7 @@ class Factura(models.Model):
             with transaction.atomic():
                 last_invoice = Factura.objects.order_by('numero_factura').last()
                 self.numero_factura = (last_invoice.numero_factura + 1) if last_invoice else 1
+                self.numero_factura = str(self.numero_factura).zfill(5)
 
         # Guardar la factura
         super().save(*args, **kwargs)

@@ -30,3 +30,19 @@ class EstudianteViewSet(viewsets.ModelViewSet):
         else:
             # Si hay errores de validación, se devuelven los errores detallados
             return Response({"success": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)  # Permite soportar actualizaciones parciales (PATCH)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"success": True, "message": "Estudiante actualizado exitosamente."}, status=status.HTTP_200_OK)
+        else:
+            return Response({"success": False, "errors": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response({"success": True, "message": "Estudiante eliminado exitosamente."}, status=status.HTTP_200_OK)

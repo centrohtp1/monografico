@@ -7,6 +7,8 @@ from estudiantes.models import Estudiante
 from Cursos.models import Curso
 from django.utils import timezone
 
+from profesores.models import Profesor
+
 
 
 class Seccion(models.Model):
@@ -16,6 +18,7 @@ class Seccion(models.Model):
     fecha_termino = models.DateField(null=True, blank=True)
     estudiantes = models.ManyToManyField(Estudiante, related_name='secciones')
     pagado = models.BooleanField(default=False)  # Agregar este campo
+   # profesores = models.ForeignKey(Profesor, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return self.nombre

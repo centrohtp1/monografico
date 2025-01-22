@@ -45,6 +45,13 @@ class CuentaPorCobrarListAPI(generics.ListAPIView):
     serializer_class = CuentaPorCobrarSerializer
 
 
+from dateutil.relativedelta import relativedelta
+from django.db import transaction
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from rest_framework import status
+from django.utils import timezone
+
 @api_view(['POST'])
 def generar_cuentas_api(request):
     mensajes_exito = []
@@ -70,14 +77,19 @@ def generar_cuentas_api(request):
                     mensajes_error.append(f"No se encontró tarifa para la sección {seccion.id}.")
                     continue
 
+                # Calcular la duración en meses de la sección
+                meses_duracion = (relativedelta(seccion.fecha_termino, seccion.fecha_inicio)).months
+                if meses_duracion <= 0:
+                    mensajes_error.append(f"La duración de la sección {seccion.id} es inválida (menos de un mes).")
+                    continue
+
+                monto_total = tarifa.precio
+                monto_por_mes = monto_total / meses_duracion
+
                 for estudiante in estudiantes:
                     cuenta_existente = CuentaPorCobrar.objects.filter(estudiante=estudiante, seccion=seccion).exists()
 
                     if not cuenta_existente:
-                        monto_total = tarifa.precio
-                        meses_duracion = (seccion.fecha_termino - seccion.fecha_inicio).days // 30
-                        monto_por_mes = monto_total / meses_duracion if meses_duracion > 0 else 0
-                        
                         fecha_actual = seccion.fecha_inicio
                         while fecha_actual <= seccion.fecha_termino:
                             # Crear cuenta por cobrar
@@ -113,9 +125,9 @@ def generar_cuentas_api(request):
             return Response({"errors": "\n".join(mensajes_error)}, status=status.HTTP_400_BAD_REQUEST)
         return Response({"info": "No se generaron cuentas ni facturas. No hay secciones por facturar."}, status=status.HTTP_204_NO_CONTENT)
 
-
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 # API para pagar factura
 @api_view(['POST'])

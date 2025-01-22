@@ -45,17 +45,11 @@ class CuentaPorCobrarListAPI(generics.ListAPIView):
     serializer_class = CuentaPorCobrarSerializer
 
 
-from dateutil.relativedelta import relativedelta
-from django.db import transaction
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from rest_framework import status
-from django.utils import timezone
-
-from decimal import Decimal, ROUND_DOWN
 
 from decimal import Decimal, ROUND_DOWN
 from datetime import timedelta
+from dateutil.relativedelta import relativedelta
+from django.utils import timezone
 
 @api_view(['POST'])
 def generar_cuentas_api(request):
@@ -64,9 +58,10 @@ def generar_cuentas_api(request):
 
     try:
         with transaction.atomic():  # Asegura que todas las operaciones se realicen en una sola transacción
-            secciones = Seccion.objects.filter(fecha_termino__lt=timezone.now())
+            secciones = Seccion.objects.all()  # Obtener todas las secciones, no solo las terminadas
+
             if not secciones:
-                return Response({"warning": "No hay secciones finalizadas para generar facturas."}, status=status.HTTP_400_BAD_REQUEST)
+                return Response({"warning": "No hay secciones para generar facturas."}, status=status.HTTP_400_BAD_REQUEST)
 
             for seccion in secciones:
                 seccion_estudiantes = SeccionEstudiante.objects.filter(seccion=seccion)
@@ -157,7 +152,6 @@ def generar_cuentas_api(request):
 
     except Exception as e:
         return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
 
 
 # API para pagar factura

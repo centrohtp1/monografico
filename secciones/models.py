@@ -13,12 +13,15 @@ from profesores.models import Profesor
 
 class Seccion(models.Model):
     nombre = models.CharField(max_length=100)
-    curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
+  #  curso = models.ForeignKey(Curso, on_delete=models.CASCADE)
     fecha_inicio = models.DateField(null=True, blank=True)
     fecha_termino = models.DateField(null=True, blank=True)
     estudiantes = models.ManyToManyField(Estudiante, related_name='secciones')
     pagado = models.BooleanField(default=False)  # Agregar este campo
-    profesores = models.ForeignKey(Profesor, on_delete=models.SET_NULL, null=True)
+     # No permite eliminar un curso asociado
+    curso = models.ForeignKey(Curso, on_delete=models.PROTECT, null=True, blank=True)
+    profesor = models.ForeignKey(Profesor, on_delete=models.PROTECT, null=True, blank=True)  # Permitir nulos
+   
 
     def __str__(self):
         return self.nombre

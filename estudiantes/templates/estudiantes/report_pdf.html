@@ -1,31 +1,1027 @@
-<!-- estudiantes/report_pdf.html -->
-<!DOCTYPE html>
+
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <title>Reporte de Estudiantes</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Sistema Educativo HTP</title>
+
+    <!-- Cargar Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Cargar DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+
+    <!-- Cargar FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<!-- Font Awesome -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+
+    <!-- Cargar jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Cargar DataTables JS -->
+    <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+
+    <!-- SweetAlert para notificaciones -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <style>#listaEstudiantesDisponibles tr:hover {
+    cursor: pointer;  /* Cambia el puntero a una manita */
+}
+ </style>
 </head>
+
 <body>
-    <h1>Reporte de Estudiantes</h1>
-    <table border="1" class="table table-striped">
-        <thead>
+
+    <div class="container my-4">
+        <!-- Título -->
+        <h2> Lista de Secciones</h2>
+
+        <!-- Botón Crear Sección -->
+   <button class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#modalCrearSeccion">
+    <i class="fas fa-plus-circle"></i> Crear Sección
+</button>
+
+
+        <!-- Tabla de Secciones -->
+        <table id="tablaSecciones" class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Término</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="listaSecciones">
+                <!-- Las secciones serán insertadas dinámicamente aquí -->
+            </tbody>
+        </table>
+    </div>
+  
+  <!-- Modal de Creación de Sección -->
+<div class="modal fade" id="modalCrearSeccion" tabindex="-1" aria-labelledby="modalCrearSeccionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalCrearSeccionLabel">Crear Nueva Sección</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCrearSeccion">
+                    <div class="mb-3">
+                        <label for="nombreSeccionCrear" class="form-label">Nombre de la Sección</label>
+                        <input type="text" class="form-control" id="nombreSeccionCrear" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaInicioCrear" class="form-label">Fecha de Inicio</label>
+                        <input type="date" class="form-control" id="fechaInicioCrear" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaTerminoCrear" class="form-label">Fecha de Término</label>
+                        <input type="date" class="form-control" id="fechaTerminoCrear" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cursoSeccionCrear" class="form-label">Curso</label>
+                        <select class="form-control" id="cursoSeccionCrear" required>
+                            <!-- Opciones del curso se llenarán dinámicamente -->
+                        </select>
+                    </div>
+                    <!-- Campo para seleccionar Profesor -->
+                    <div class="mb-3">
+                        <label for="profesorSeccionCrear" class="form-label">Profesor</label>
+                        <select class="form-control" id="profesorSeccionCrear" required>
+                            <!-- Opciones de profesores -->
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check" style="display: none;">
+                        <input type="checkbox" class="form-check-input" id="pagadoSeccionCrear">
+                        <label class="form-check-label" for="pagadoSeccionCrear">Pagado</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" id="guardarCreacion" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Crear Sección
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+  
+  
+  
+  
+  <!-- Modal de Edición de Sección -->
+<div class="modal fade" id="modalEditarSeccion" tabindex="-1" aria-labelledby="modalEditarSeccionLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarSeccionLabel">Editar Sección</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarSeccion">
+                    <div class="mb-3">
+                        <label for="nombreSeccion" class="form-label">Nombre de la Sección</label>
+                        <input type="text" class="form-control" id="nombreSeccion" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaInicio" class="form-label">Fecha de Inicio</label>
+                        <input type="date" class="form-control" id="fechaInicio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fechaTermino" class="form-label">Fecha de Término</label>
+                        <input type="date" class="form-control" id="fechaTermino" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="cursoSeccion" class="form-label">Curso</label>
+                        <select class="form-control" id="cursoSeccion" required>
+                            <!-- Opciones del curso se llenarán dinámicamente -->
+                        </select>
+                    </div>
+                    <!-- Campo para seleccionar Profesor -->
+                    <div class="mb-3">
+                        <label for="profesorSeccion" class="form-label">Profesor</label>
+                        <select class="form-control" id="profesorSeccion" required>
+                            <!-- Opciones de profesores -->
+                        </select>
+                    </div>
+                    <div class="mb-3 form-check" style="display: none;">
+                        <input type="checkbox" class="form-check-input" id="pagadoSeccionCrear">
+                        <label class="form-check-label" for="pagadoSeccionCrear">Pagado</label>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancelar
+                </button>
+                <button type="button" id="guardarEdicion" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Guardar cambios
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Modal de gestión de sección -->
+<div class="modal fade" id="modalGestionarSeccion" tabindex="-1" aria-labelledby="modalGestionarSeccionLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+         
+        <h5 class="modal-title" 
+           id="modalGestionarSeccionLabel">Gestionar Sección</h5>
+
+
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        
+      
+      </div>
+<div class="d-flex justify-content-start">
+    <button id="agregarEstudiante" class="btn btn-primary my-3" data-bs-toggle="modal" data-bs-target="#modalAgregarEstudiante">
+     <i class="fas fa-user"></i>     Agregar Estudiante
+    </button>
+</div>
+
+        
+      <div class="modal-body">
+        <h5>Estudiantes en esta sección:</h5>
+        <table id="tablaEstudiantes" class="table">
+          <thead>
             <tr>
-                <th>ID</th>
-                <th>Nombre</th>
-                <th>Fecha de Ingreso</th>
-                <th>Correo</th>
+                 <th>Codigo</th>
+              <th>Nombre</th>
+              <th>Nota</th>
+              <th>Acciones</th>
             </tr>
-        </thead>
-        <tbody>
-            {% for estudiante in estudiantes %}
+          </thead>
+          <tbody id="listaEstudiantes"></tbody>
+        </table>
+
+     
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal para agregar estudiante -->
+<div class="modal fade" id="modalAgregarEstudiante" tabindex="-1" aria-labelledby="modalAgregarEstudianteLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalAgregarEstudianteLabel">Seleccionar Estudiante</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <h5>Lista de estudiantes:</h5>
+        <table id="tablaEstudiantesDisponibles" class="table">
+          <thead>
             <tr>
-                <td>{{ estudiante.id }}</td>
-                <td>{{ estudiante.nombre }}</td>
-                <td>{{ estudiante.fecha_ingreso }}</td>
-                <td>{{ estudiante.correo }}</td>
+              <th>Nombre</th>
+            
             </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</body>
-</html>
+          </thead>
+          <tbody id="listaEstudiantesDisponibles"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Modal para Editar Estudiante -->
+<div class="modal fade" id="modalEditarEstudiante" tabindex="-1" aria-labelledby="modalEditarEstudianteLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEditarEstudianteLabel">Editar Estudiante</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formEditarEstudiante">
+                    <div class="mb-3">
+                        <label for="nombreEstudiante" class="form-label">Nombre del Estudiante</label>
+                        <input type="text" class="form-control" id="nombreEstudiante" disabled>
+                    </div>
+                    <div class="mb-3">
+                        <label for="notaEstudiante" class="form-label">Nota</label>
+                        <input type="number" class="form-control" id="notaEstudiante" required>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-success">   <i class="fas fa-save"></i> Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let cursos = [];  // Almacenar los cursos cargados globalmente
+
+$(document).ready(function() {
+  
+      $('#modalCrearSeccion').on('hidden.bs.modal', function () {
+        // Limpiar los campos del formulario
+        $('#formCrearSeccion')[0].reset();
+    });
+  // Escuchar el mensaje enviado desde el iframe
+
+
+      // Inicializar DataTable
+      $('#tablaSecciones').DataTable({
+        "paging": true,  // Activar la paginación
+        "searching": true,  // Habilitar búsqueda
+        "ordering": true,  // Habilitar ordenamiento
+        "info": true,  // Información de la tabla
+        "language": {
+            "search": "Buscar:",
+            "lengthMenu": "Mostrar _MENU_ registros",
+            "info": "Mostrando _START_ a _END_ de _TOTAL_ registros",
+            "infoEmpty": "Mostrando 0 a 0 de 0 registros",
+            "infoFiltered": "(filtrado de _MAX_ registros totales)",
+            "paginate": {
+                "previous": "Anterior",
+                "next": "Siguiente"
+            }
+        }
+    });
+      // Inicializar DataTable
+  
+cargarCursos(); 
+cargarProfesor();
+  cargarSecciones(); // Cargar la lista de secciones
+ // Cargar los cursos una sola vez cuando la página carga
+
+});
+document.getElementById('modalCrearSeccion').addEventListener('show.bs.modal', cargarProfesor);
+document.getElementById('modalEditarSeccion').addEventListener('show.bs.modal', cargarProfesor);
+
+
+function cargarProfesor() {
+    console.log("Iniciando la carga de profesores...");
+    fetch('https://web-production-3f4f.up.railway.app/profesores/', {
+        headers: {
+            // 'Authorization': `Token ${token}`
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`Error en la respuesta de la API: ${response.status}`);
+        }
+        console.log("Respuesta de la API recibida correctamente.");
+        return response.json();
+    })
+    .then(profesores => {
+        console.log("Datos recibidos de la API:", profesores);
+        if (Array.isArray(profesores) && profesores.length > 0) {
+            llenarSelectProfesor(profesores); // Llenar el select de profesores
+        } else {
+            console.warn("La respuesta no contiene profesores válidos.");
+            Swal.fire('Error', 'No se encontraron profesores disponibles.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error al cargar los profesores:', error);
+        Swal.fire('Error', 'Hubo un problema al cargar los profesores.', 'error');
+    });
+}
+
+function llenarSelectProfesor(profesores) {
+    console.log("Llenando selectores de profesores...");
+    const profesorSelectCrear = document.getElementById('profesorSeccionCrear');
+    const profesorSelectEditar = document.getElementById('profesorSeccion'); // Select de edición
+
+    // Validar si los elementos existen en el DOM
+    if (!profesorSelectCrear || !profesorSelectEditar) {
+        console.error("No se encontraron los selectores en el DOM.");
+        return;
+    }
+
+    // Limpiar los select antes de agregar opciones
+    profesorSelectCrear.innerHTML = '';
+    profesorSelectEditar.innerHTML = '';
+
+    // Recorrer el array de profesores y añadir opciones
+    profesores.forEach(profesor => {
+        console.log(`Añadiendo profesor: ${profesor.nombre} ${profesor.apellido}`);
+        const optionCrear = document.createElement('option');
+        optionCrear.value = profesor.id;
+        optionCrear.textContent = `${profesor.nombre} ${profesor.apellido}`;
+        profesorSelectCrear.appendChild(optionCrear);
+
+        const optionEditar = document.createElement('option');
+        optionEditar.value = profesor.id;
+        optionEditar.textContent = `${profesor.nombre} ${profesor.apellido}`;
+        profesorSelectEditar.appendChild(optionEditar);
+    });
+
+    console.log("Selectores de profesores llenados correctamente.");
+}
+
+
+
+
+
+function cargarCursos() {
+
+
+  fetch('https://web-production-3f4f.up.railway.app/cursos/', {
+      headers: { 
+     //   'Authorization': `Token ${token}`
+      }
+  })
+  .then(response => response.json())
+  .then(cursos => {
+      if (Array.isArray(cursos) && cursos.length > 0) {
+          cursos = cursos; // Guardar los cursos globalmente
+          llenarSelectCursos(cursos); // Llenar el select de cursos
+      } else {
+          console.error('No se encontraron cursos');
+          Swal.fire('Error', 'No se encontraron cursos disponibles.', 'error');
+      }
+  })
+  .catch(error => {
+      console.error('Error al cargar los cursos:', error);
+      Swal.fire('Error', 'Hubo un problema al cargar los cursos.', 'error');
+  });
+}
+
+
+function llenarSelectCursos(cursos) {
+  const cursoSelectCrear = document.getElementById('cursoSeccionCrear');
+  const cursoSelectEditar = document.getElementById('cursoSeccion');  // Select de edición
+
+  // Limpiar los select antes de agregar opciones
+  cursoSelectCrear.innerHTML = '';
+  cursoSelectEditar.innerHTML = '';
+
+  // Aseguramos que haya cursos disponibles
+  if (cursos.length > 0) {
+      cursos.forEach(curso => {
+          // Crear una opción para el select de creación
+          const optionCrear = document.createElement('option');
+          optionCrear.value = curso.id;
+          optionCrear.textContent = curso.nombre;
+          cursoSelectCrear.appendChild(optionCrear);
+
+          // Crear una opción para el select de edición
+          const optionEditar = document.createElement('option');
+          optionEditar.value = curso.id;
+          optionEditar.textContent = curso.nombre;
+          cursoSelectEditar.appendChild(optionEditar);
+      });
+  } else {
+      const option = document.createElement('option');
+      option.textContent = 'No hay cursos disponibles';
+      option.disabled = true;
+      cursoSelectCrear.appendChild(option);
+      cursoSelectEditar.appendChild(option);
+  }
+}
+
+
+// Función para cargar las secciones en la tabla
+function cargarSecciones() {
+  const token = sessionStorage.getItem('authToken');
+  fetch('https://web-production-3f4f.up.railway.app/secciones/lista/', {
+      method: 'GET',  // Aseguramos que la solicitud sea GET
+      headers: {
+          // 'Authorization': `Token ${token}`  // Agregamos el token en los encabezados
+      }
+  })
+  .then(response => response.json())
+  .then(secciones => {
+      const tableBody = document.getElementById('listaSecciones');
+      tableBody.innerHTML = ''; // Limpiar el cuerpo de la tabla
+
+      // Insertar las filas en la tabla
+      secciones.forEach(seccion => {
+          const row = tableBody.insertRow();
+          row.innerHTML = `
+              <td>${seccion.nombre}</td>
+              <td>${seccion.fecha_inicio}</td>
+              <td>${seccion.fecha_termino}</td>
+          <td>
+    <!-- Botón de Gestionar con icono -->
+    <button class="btn btn-info btn-sm" onclick="gestionarSeccion(${seccion.id})">
+        <i class="fas fa-cogs"></i> Gestionar
+    </button>
+
+    <!-- Botón de Editar con icono -->
+    <button class="btn btn-secondary btn-sm" onclick="cargarSeccion(${seccion.id})">
+        <i class="fas fa-edit"></i> Editar
+    </button>
+
+    <!-- Botón de Eliminar con icono -->
+    <button class="btn btn-danger btn-sm" onclick="eliminarSeccion(${seccion.id})">
+        <i class="fas fa-trash-alt"></i> Eliminar
+    </button>
+</td>
+
+          `;
+      });
+
+   
+
+  })
+  .catch(error => Swal.fire('Error', 'Hubo un problema al cargar las secciones.', 'error'));
+}
+    
+ // Función para cargar la sección en el formulario de edición
+function cargarSeccion(seccionId) {
+
+
+  // Realizamos la solicitud fetch con el token en los headers
+  fetch(`https://web-production-3f4f.up.railway.app/secciones/secciones/obt/${seccionId}/`, {
+      method: 'GET',  // Aseguramos que la solicitud sea GET
+      headers: {
+        //  'Authorization': `Token ${token}`  // Agregamos el token en los encabezados
+      }
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('Error al obtener la sección');
+      }
+      return response.json();  // Procesamos el JSON si la respuesta es correcta
+  })
+  .then(seccion => {
+      // Asegurarnos de que los datos de la sección estén completos
+      if (!seccion || !seccion.nombre) {
+          throw new Error('Datos de sección incompletos');
+      }
+
+      // Llenamos el formulario con los datos de la sección
+      document.getElementById("nombreSeccion").value = seccion.nombre;
+      document.getElementById("fechaInicio").value = seccion.fecha_inicio.split('T')[0];  // Asegúrate que sea una fecha válida
+      document.getElementById("fechaTermino").value = seccion.fecha_termino.split('T')[0];  // Asegúrate que sea una fecha válida
+
+      // Establecer el curso seleccionado en el formulario de edición
+      const cursoSelect = document.getElementById('cursoSeccion');
+      for (let i = 0; i < cursoSelect.options.length; i++) {
+          if (cursoSelect.options[i].value == seccion.curso.id) {
+              cursoSelect.selectedIndex = i;
+              break;
+          }
+      }
+
+      const profesorSelect = document.getElementById('profesorSeccion');
+      for (let i = 0; i < profesorSelect.options.length; i++) {
+          if (profesorSelect.options[i].value == seccion.profesor.id) {
+            profesorSelect.selectedIndex = i;
+              break;
+          }
+      }
+
+      // Establecer el estado del checkbox "pagado"
+      document.getElementById("pagadoSeccion").checked = seccion.pagado;
+
+      // Mostrar el modal de edición
+      document.getElementById("guardarEdicion").setAttribute("data-id", seccionId);
+      var myModal = new bootstrap.Modal(document.getElementById('modalEditarSeccion'));
+      myModal.show();
+  })
+  .catch(error => {
+      Swal.fire('Error', error.message || 'No se pudo cargar la sección para editar.', 'error');
+  });
+}
+
+    
+    
+    
+    
+ // Asociar el evento click al botón "Guardar cambios"
+document.getElementById('guardarEdicion').addEventListener('click', guardarEdicion);
+
+function guardarEdicion() {
+  // Obtener el ID de la sección desde el botón
+  const seccionId = document.getElementById("guardarEdicion").getAttribute("data-id");
+
+  // Verificar que el ID de la sección sea válido
+  if (!seccionId) {
+      Swal.fire('Error', 'No se ha seleccionado una sección válida para editar.', 'error');
+      console.log('Sección ID no válido:', seccionId);
+      return;
+  }
+
+  // Obtener los valores de los campos del formulario
+  const nombre = document.getElementById("nombreSeccion").value;
+  const fechaInicio = document.getElementById("fechaInicio").value;
+  const fechaTermino = document.getElementById("fechaTermino").value;
+  const cursoId = document.getElementById("cursoSeccion").value;
+  const pagado = document.getElementById("pagadoSeccion").checked;
+  const profesorId = document.getElementById("profesorSeccion").value;
+
+  // Validar que los campos no estén vacíos
+  if (!nombre || !fechaInicio || !fechaTermino || !cursoId) {
+      Swal.fire('Error', 'Por favor complete todos los campos del formulario.', 'error');
+      return;
+  }
+
+  // Crear un objeto con los datos de la sección
+  const seccionData = {
+      nombre: nombre,
+      fecha_inicio: fechaInicio,
+      fecha_termino: fechaTermino,
+      curso: cursoId,
+      pagado: pagado,
+      profesor: profesorId
+  };
+
+  // Recuperar el token del sessionStorage
+  const token = sessionStorage.getItem('authToken'); 
+
+
+  // Mostrar un indicador de carga
+  Swal.fire({
+      title: 'Cargando...',
+      text: 'Guardando cambios, por favor espere.',
+      showConfirmButton: false,
+      didOpen: () => {
+          Swal.showLoading();
+      }
+  });
+
+  // Realizar la solicitud PUT con el token en los encabezados
+  fetch(`https://web-production-3f4f.up.railway.app/secciones/${seccionId}`, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+      //    'Authorization': `Token ${token}`  // Agregamos el token en los encabezados
+      },
+      body: JSON.stringify(seccionData)
+  })
+  .then(response => response.json())
+  .then(data => {
+      console.log(data); // Verifica los datos de respuesta en la consola
+      if (data.success) {
+          Swal.fire('Éxito', 'Sección actualizada correctamente.', 'success');
+       
+          const myModal = bootstrap.Modal.getInstance(document.getElementById('modalEditarSeccion')); 
+        cargarSecciones(); // Recargar la lista de secciones
+          // Cerrar el modal de edición
+          myModal.hide();
+      } else {
+          Swal.fire('Error', 'No se pudo actualizar la sección.', 'error');
+      }
+  })
+  .catch(error => {
+      Swal.fire('Error', 'Hubo un problema al guardar los cambios.', 'error');
+      console.error('Error en la solicitud:', error); // Mostrar error en la consola
+  })
+  .finally(() => {
+      Swal.close(); // Cerrar el indicador de carga
+  });
+}
+
+
+    
+    
+    
+    
+    
+   // Función para eliminar la sección
+function eliminarSeccion(seccionId) {
+  Swal.fire({
+    title: '¿Estás seguro?',
+    text: 'Esta sección se eliminará permanentemente.',
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: 'Eliminar',
+    cancelButtonText: 'Cancelar'
+  }).then(result => {
+    if (result.isConfirmed) {
+      fetch(`https://web-production-3f4f.up.railway.app/secciones/eliminar/${seccionId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json', // Asegúrate de que esto esté configurado
+          // 'Authorization': `Token ${token}` // Descomentar si usas autenticación
+        }
+      })
+        .then(response => {
+          console.log('Respuesta del servidor:', response); // Diagnosticar respuesta
+          if (response.ok) {
+            return response.json();
+          } else {
+            throw new Error(
+              `Error al eliminar la sección. Estado: ${response.status}`
+            );
+          }
+        })
+        .then(data => {
+          if (data.success) {
+            Swal.fire('Éxito', 'Sección eliminada correctamente.', 'success');
+            cargarSecciones(); // Recargar las secciones si es necesario
+          } else {
+            Swal.fire('Error', data.error || 'No se pudo eliminar la sección.', 'error');
+          }
+        })
+        .catch(error => {
+          Swal.fire('Error', error.message, 'error');
+        });
+    }
+  });
+}
+
+
+    
+    
+    
+document.getElementById('guardarEdicion').addEventListener('click', function() {
+  guardarEdicion();
+  cargarSecciones(); 
+ // Recargar la lista después de editar
+});
+
+document.getElementById('guardarCreacion').addEventListener('click', function() {
+  guardarCreacion();
+  cargarSecciones();  
+   // Recargar la lista después de crear
+});
+
+
+// Hacer la solicitud POST para crear la nueva sección
+function guardarCreacion() {
+  const token = sessionStorage.getItem('authToken'); 
+
+  // Obtener los valores de los campos del formulario
+  const nombre = document.getElementById("nombreSeccionCrear").value;
+  const fechaInicio = document.getElementById("fechaInicioCrear").value;
+  const fechaTermino = document.getElementById("fechaTerminoCrear").value;
+  const cursoId = document.getElementById("cursoSeccionCrear").value;
+  const pagado = document.getElementById("pagadoSeccionCrear").checked;  // Booleano
+  const profesorId = document.getElementById("profesorSeccionCrear").value;  // Booleano
+
+  // Validación básica
+  if (!nombre || !fechaInicio || !fechaTermino || !cursoId) {
+      Swal.fire('Error', 'Por favor complete todos los campos.', 'error');
+      return;
+  }
+
+  // Crear un objeto con los datos de la sección
+  const seccionData = {
+      nombre: nombre,
+      fecha_inicio: fechaInicio,
+      fecha_termino: fechaTermino,
+      curso: cursoId,
+      pagado: pagado,
+      profesor: profesorId 
+  };
+
+  // Hacer la solicitud POST al backend para crear la nueva sección
+  fetch('https://web-production-3f4f.up.railway.app/secciones/', {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+      //    'Authorization': `Token ${token}`  // Agregar el token aquí
+      },
+      body: JSON.stringify(seccionData)  // Enviar los datos en formato JSON
+  })
+  .then(response => response.json())  // Procesar la respuesta JSON
+  .then(data => {
+      if (data.nombre) {  // Si la respuesta contiene un nombre, significa que se creó correctamente
+          // Mostrar el mensaje de éxito con un botón de OK
+          Swal.fire({
+              title: 'Éxito',
+              text: 'Sección creada correctamente.',
+              icon: 'success',
+              confirmButtonText: 'OK'  // Botón de confirmación
+          }).then(() => {
+              
+              const myModal = bootstrap.Modal.getInstance(document.getElementById('modalCrearSeccion'));
+            cargarSecciones();  // Recargar la lista de secciones
+              // Cerrar el modal de creación
+              myModal.hide();  // Cerrar el modal
+          });
+      } else {
+          Swal.fire('Error', 'No se pudo crear la sección.', 'error');
+      }
+  })
+  .catch(error => {
+      Swal.fire('Error', 'Hubo un problema al crear la sección.', 'error');
+      console.error('Error al crear la sección:', error);
+  });
+}
+ 
+    
+    
+    
+let seccionIdGlobal = null; 
+  function gestionarSeccion(seccionId) {
+  seccionIdGlobal = seccionId;
+
+
+// Destruir la instancia de DataTable si ya existe
+  if ($.fn.DataTable.isDataTable('#tablaEstudiantes')) {
+      $('#tablaEstudiantes').DataTable().clear().destroy();
+  }
+  // Cargar los estudiantes de la sección
+  fetch(`https://web-production-3f4f.up.railway.app/secciones/${seccionId}/estudiantes/`, {
+      method: 'GET',
+      headers: {
+      //  'Authorization': `Token ${token}` 
+      }
+  })
+  .then(response => {
+      if (!response.ok) {
+          throw new Error('No se pudieron cargar los estudiantes.');
+      }
+      return response.json();
+  })
+  .then(estudiantes => {
+      const tbodyEstudiantes = document.getElementById("listaEstudiantes");
+      tbodyEstudiantes.innerHTML = '';  // Limpiar cualquier contenido previo
+
+      // Si no hay estudiantes, mostrar la advertencia pero permitir la acción de agregar estudiantes
+      if (estudiantes.length === 0) {
+          Swal.fire({
+              icon: 'warning',
+              title: 'Sin estudiantes',
+              text: 'No hay estudiantes registrados en esta sección, pero puedes agregar nuevos.',
+              confirmButtonText: 'Aceptar'
+          });
+      }
+
+      // Cargar los estudiantes de la sección en la tabla
+      estudiantes.forEach(estudianteData => {
+          const row = tbodyEstudiantes.insertRow();
+          const estudiante = estudianteData.estudiante; // Accedemos al objeto estudiante
+
+          row.innerHTML = `
+                  <td>${estudiante.id}</td>  <!-- Nombre y apellido -->
+              <td>${estudiante.nombre}</td>  <!-- Nombre y apellido -->
+              <td>${estudianteData.nota || 'No disponible'}</td> <!-- Nota -->
+              <td>
+                  <button class="btn btn-warning btn-sm" onclick="editarEstudiante(${seccionId}, ${estudiante.id})">  <i class="fas fa-edit"></i>Editar</button>
+                  <button class="btn btn-danger btn-sm" onclick="eliminarEstudiante(${seccionId}, ${estudiante.id})">
+    <i class="fas fa-trash-alt"></i> Eliminar
+</button>
+
+              </td>
+          `;
+      });
+
+      $('#tablaEstudiantes').DataTable({ "destroy": true });
+
+      // Mostrar el modal de gestión de la sección si no estaba visible
+      const modal = new bootstrap.Modal(document.getElementById('modalGestionarSeccion'));
+      modal.show();
+  })
+  .catch(error => {
+      console.error('Error al obtener estudiantes:', error);
+      Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: error.message  // Muestra el mensaje de error
+      });
+  });
+}
+
+
+    
+ 
+    
+   // Llamar a esta función cuando se haga clic en el botón
+document.getElementById('agregarEstudiante').addEventListener('click', cargarEstudiantesDisponibles);
+
+function cargarEstudiantesDisponibles() {
+ 
+
+  fetch('https://web-production-3f4f.up.railway.app/estudiantes/', {
+      method: 'GET',
+      headers: { 
+      //  'Authorization': `Token ${token}` 
+      }
+  })
+  .then(response => response.json())
+  .then(estudiantes => {
+      const tbodyEstudiantesDisponibles = document.getElementById("listaEstudiantesDisponibles");
+      tbodyEstudiantesDisponibles.innerHTML = ''; // Limpia antes de agregar filas
+
+      estudiantes.forEach(estudiante => {
+          const row = tbodyEstudiantesDisponibles.insertRow();
+          row.innerHTML = `<td>${estudiante.nombre} ${estudiante.apellido}</td>`;
+          row.classList.add('clickable-row');
+
+          row.addEventListener('dblclick', () => {
+              console.log('Estudiante seleccionado: ', estudiante.id);
+              agregarEstudianteASeccion(estudiante.id); 
+              const modal = bootstrap.Modal.getInstance(document.getElementById('modalAgregarEstudiante'));
+              modal.hide();
+          });
+      });
+
+      // Destruir e inicializar DataTables solo si hay filas
+      if (estudiantes.length > 0) {
+          $('#tablaEstudiantesDisponibles').DataTable({
+              destroy: true,
+              language: {
+                  url: "https://cdn.datatables.net/plug-ins/1.11.5/i18n/Spanish.json"
+              }
+          });
+      }
+  })
+  .catch(error => {
+      console.error('Error al obtener estudiantes disponibles:', error);
+      Swal.fire('Error', 'Hubo un problema al cargar los estudiantes disponibles.', 'error');
+  });
+}
+
+    
+    
+    
+
+    
+    
+    
+    
+    
+    // Agregar estudiante a la sección
+function agregarEstudianteASeccion(estudianteId) {
+  if (!seccionIdGlobal) {
+      console.error("No se ha seleccionado una sección.");
+      return;
+  }
+
+
+
+  fetch(`https://web-production-3f4f.up.railway.app/secciones/${seccionIdGlobal}/estudiantes/agregar/`, {
+      method: 'POST',
+      headers: {
+          'Content-Type': 'application/json',
+         // 'Authorization': `Token ${token}`  // Agregar el token al header
+      },
+      body: JSON.stringify({ estudiante_id: estudianteId }),
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          Swal.fire('Éxito', `El estudiante ${data.nombre} ha sido agregado a la sección.`, 'success');
+          gestionarSeccion(seccionIdGlobal);  // Recargar la lista de estudiantes de la sección
+      } else {
+          Swal.fire('Error', data.error || 'No se pudo agregar al estudiante.', 'error');
+      }
+  })
+  .catch(error => Swal.fire('Error', 'Hubo un problema al agregar al estudiante.', 'error'));
+}
+    
+    
+    
+    
+// Eliminar estudiante de la sección
+function eliminarEstudiante(seccionId, estudianteId) {
+
+
+  fetch(`https://web-production-3f4f.up.railway.app/secciones/${seccionId}/elim_estudiantes/${estudianteId}/`, {
+      method: 'DELETE',
+      headers: {
+     //     'Authorization': `Token ${token}`  // Agregar el token al header
+      }
+  })
+  .then(response => {
+      if (response.ok) {
+          Swal.fire('Éxito', 'Estudiante eliminado correctamente.', 'success');
+          gestionarSeccion(seccionId);  // Recargar la lista de estudiantes
+      } else {
+          Swal.fire('Error', 'No se pudo eliminar al estudiante.', 'error');
+      }
+  })
+  .catch(error => {
+      Swal.fire('Error', 'Hubo un problema al eliminar el estudiante.', 'error');
+  });
+}
+
+    
+    
+    
+    
+    function editarEstudiante(seccionId, estudianteId) {
+  const urlGet = `https://web-production-3f4f.up.railway.app/secciones/secciones/${seccionId}/estudiantes/${estudianteId}/`;
+
+
+  fetch(urlGet, {
+      method: 'GET',
+      headers: {
+        //  'Authorization': `Token ${token}`
+      }
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.estudiante) {
+          // Cargar datos en el modal
+          document.getElementById('nombreEstudiante').value = data.estudiante.nombre;
+          document.getElementById('notaEstudiante').value = data.nota;
+          
+          // Guardar IDs para el envío del formulario
+          document.getElementById('formEditarEstudiante').setAttribute('data-seccion-id', seccionId);
+          document.getElementById('formEditarEstudiante').setAttribute('data-estudiante-id', estudianteId);
+          
+          // Mostrar el modal
+          let modal = new bootstrap.Modal(document.getElementById('modalEditarEstudiante'));
+          modal.show();
+      } else {
+          alert('No se encontraron datos del estudiante.');
+      }
+  })
+  .catch(error => {
+      console.error('Error al obtener los datos:', error);
+      alert('Error al cargar los datos del estudiante.');
+  });
+}
+
+    
+    
+    
+    
+document.getElementById('formEditarEstudiante').addEventListener('submit', function(event) {
+  event.preventDefault(); // Evitar el envío del formulario por defecto
+
+  const seccionId = this.getAttribute('data-seccion-id');
+  const estudianteId = this.getAttribute('data-estudiante-id');
+  const nuevaNota = document.getElementById('notaEstudiante').value;
+  const token = sessionStorage.getItem('authToken');  // Obtener el token desde sessionStorage
+
+  const urlPut = `https://web-production-3f4f.up.railway.app/secciones/${seccionId}/estudiantes/${estudianteId}/`;
+
+  fetch(urlPut, {
+      method: 'PUT',
+      headers: {
+          'Content-Type': 'application/json',
+        //  'Authorization': `Token ${token}`
+      },
+      body: JSON.stringify({ nota: nuevaNota }),
+  })
+  .then(response => response.json())
+  .then(data => {
+      if (data.success) {
+          Swal.fire('Éxito', `Nota actualizada con éxito para ${data.nombre}. Nueva nota: ${data.nota}`, 'success');
+          location.reload(); // Recargar la página para reflejar los cambios
+      } else {
+          Swal.fire('Error', data.error || 'No se pudo actualizar la nota.', 'error');
+      }
+  })
+  .catch(error => {
+      console.error('Error al actualizar la nota:', error);
+      Swal.fire('Error', 'Hubo un problema al actualizar la nota.', 'error');
+  });
+});
+   
+
+</script></html>

@@ -1,6 +1,7 @@
 # secciones/serializers.py
 from rest_framework import serializers
 
+from Cursos.models import Curso
 from profesores.models import Profesor
 from .models import Seccion, SeccionEstudiante
 from estudiantes.models import Estudiante
@@ -11,11 +12,11 @@ class SeccionSerializer2(serializers.ModelSerializer):
         fields = '__all__'  # Ajusta los campos según sea necesario
 
 class SeccionSerializer(serializers.ModelSerializer):
-    profesor = serializers.PrimaryKeyRelatedField(queryset=Profesor.objects.all())  # Aquí agregamos el campo profesor
+    # Aquí agregamos el campo profesor
     
     class Meta:
         model = Seccion
-        fields = ['nombre', 'fecha_inicio', 'fecha_termino', 'curso', 'pagado', 'profesor']  # Ajusta los campos según sea necesario
+        fields = ['nombre', 'fecha_inicio', 'fecha_termino', 'curso', 'profesor', 'pagado']  # Ajusta los campos según sea necesario
 
 class EstudianteSerializer(serializers.ModelSerializer):
     class Meta:

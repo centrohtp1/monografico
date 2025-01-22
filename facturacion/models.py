@@ -31,35 +31,37 @@ class CuentaPorCobrar(models.Model):
     def esta_pendiente(self):
         return self.estado == 'pendiente'
 
+from django.db import models, transaction
+from decimal import Decimal
+
 class Factura(models.Model):
-    estudiante = models.ForeignKey(Estudiante, on_delete=models.PROTECT, null=True)  # Cambia a null=True
+    estudiante = models.ForeignKey(Estudiante, on_delete=models.PROTECT, null=True)
     cuenta_por_cobrar = models.ForeignKey(CuentaPorCobrar, on_delete=models.PROTECT, related_name='facturas', null=True, blank=True)
-   
+    
     numero_factura = models.IntegerField(unique=True, editable=False)
     fecha_emision = models.DateField(auto_now_add=True)
     total = models.DecimalField(max_digits=10, decimal_places=2)
     pagado = models.BooleanField(default=False)
     mes_correspondiente = models.CharField(max_length=20)
-    # El resto de tu código permanece igual
-
-
+    
     def __str__(self):
         return f"Factura {self.numero_factura} - Estudiante: {self.estudiante} - Total: {self.total} - Mes: {self.mes_correspondiente}"
 
-    
     def save(self, *args, **kwargs):
         # Verificar si la factura tiene una cuenta por cobrar asociada
         if self.cuenta_por_cobrar is None:
             raise ValueError("La factura debe tener una cuenta por cobrar asociada.")
-
+        
         # Asignar un número de factura si no tiene uno
         if not self.numero_factura:
             with transaction.atomic():
                 last_invoice = Factura.objects.order_by('numero_factura').last()
+                # Asignar el siguiente número de factura
                 self.numero_factura = (last_invoice.numero_factura + 1) if last_invoice else 1
-                self.numero_factura = str(self.numero_factura).zfill(5)
+
+        # Asegurar que el número de factura tenga 5 dígitos con ceros a la izquierda
+        self.numero_factura = str(self.numero_factura).zfill(5)
 
         # Guardar la factura
         super().save(*args, **kwargs)
-
 

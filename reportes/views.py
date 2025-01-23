@@ -182,7 +182,7 @@ def get_secciones(request):
 
         # Combinar los resultados (sin duplicados)
         secciones = secciones | anos_escolares_actual
-        secciones = secciones.select_related('profesor')
+        secciones = secciones.select_related('profesores')
         # Crear una lista con los datos de los años escolares
         estudiantes_data = list(secciones.values('id', 'nombre', 'curso__nombre', 'fecha_inicio', 'fecha_termino','profesores__nombre'))
 

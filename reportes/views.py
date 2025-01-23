@@ -145,9 +145,14 @@ def get_cursos(request):
 
         # Combinar los resultados (sin duplicados)
         cursos = cursos | anos_escolares_actual
-        cursos = cursos.select_related('profesores')
+        # cursos = cursos.select_related('profesores')
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion', 'profesores__nombre'))
+        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion'))
+        for curso in estudiantes_data:
+            curso_id = curso['id']
+            secciones = Seccion.objects.filter(curso_id=curso_id).values_list('nombre', flat=True)
+            curso['secciones'] = list(secciones)  # Convertir los nombres a una lista y agregar al curso
+
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'cursos': estudiantes_data}, status=200)

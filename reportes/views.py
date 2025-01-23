@@ -147,7 +147,7 @@ def get_cursos(request):
         cursos = cursos | anos_escolares_actual
         # cursos = cursos.select_related('profesores')
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(cursos.values('id', 'nombre', 'descripcion'))
+        estudiantes_data = list(cursos.values('id', 'nombre', 'fecha_creacion'))
         for curso in estudiantes_data:
             curso_id = curso['id']
             secciones = Seccion.objects.filter(curso_id=curso_id).values_list('nombre', flat=True)

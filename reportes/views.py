@@ -184,7 +184,7 @@ def get_secciones(request):
         secciones = secciones | anos_escolares_actual
         secciones = secciones.select_related('profesor')
         # Crear una lista con los datos de los años escolares
-        estudiantes_data = list(secciones.values('id', 'nombre', 'curso__nombre', 'fecha_inicio', 'fecha_termino','profesor'))
+        estudiantes_data = list(secciones.values('id', 'nombre', 'curso__nombre', 'fecha_inicio', 'fecha_termino','profesores__nombre'))
 
         # Retornar el JSON con los datos de los años escolares
         return JsonResponse({'secciones': estudiantes_data}, status=200)

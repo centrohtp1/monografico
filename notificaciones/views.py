@@ -32,7 +32,7 @@ class GenerarNotificacionesAPIView(APIView):
             notificaciones_generadas = []
             for seccion in secciones:
                 # Verificar si ya existe una notificación para esta sección
-                if Notificacion.objects.filter(seccion=seccion, leida=False).exists():
+                if Notificacion.objects.filter(seccion=seccion, leido=False).exists():
                     # Si existe, no crear una nueva
                     continue
 

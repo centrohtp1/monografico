@@ -25,6 +25,7 @@ class EstudianteSerializer(serializers.ModelSerializer):
 
 class SeccionEstudianteSerializer(serializers.ModelSerializer):
     estudiante = EstudianteSerializer()
+    estado = serializers.SerializerMethodField() 
 
     class Meta:
         model = SeccionEstudiante

@@ -28,19 +28,18 @@ class SeccionEstudianteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SeccionEstudiante
-        fields = ['estudiante', 'nota1', 'nota2', 'nota3', 'nota4', 'promedio']  # Ajusta los campos según sea necesario
+        fields = ['estudiante', 'nota', 'nota2', 'nota3', 'nota4', 'promedio']
 
     def update(self, instance, validated_data):
-        # Actualiza las notas
-        instance.nota = validated_data.get('nota1', instance.nota)
+        instance.nota = validated_data.get('nota', instance.nota)
         instance.nota2 = validated_data.get('nota2', instance.nota2)
         instance.nota3 = validated_data.get('nota3', instance.nota3)
         instance.nota4 = validated_data.get('nota4', instance.nota4)
-
-        # Calcular el promedio basado en las notas
-        instance.promedio = (instance.nota + instance.nota2 + instance.nota3 + instance.nota4) / 4
+        
+        # Calcular el nuevo promedio, ya que el modelo se encargará de esto al guardar
         instance.save()
         return instance
+
 
 
 

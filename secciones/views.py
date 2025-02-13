@@ -186,6 +186,7 @@ def eliminar_estudiante_api(request, seccion_id, estudiante_id):
     return Response({'success': True, 'message': 'Estudiante eliminado correctamente de la sección.'}, status=status.HTTP_204_NO_CONTENT)
 
 
+"""
 
 # secciones/views_api.py
 
@@ -221,4 +222,68 @@ def obtener_estudiante_en_seccion2(request, seccion_id, estudiante_id):
             'nombre': seccion_estudiante.estudiante.nombre
         },
         'nota': seccion_estudiante.nota
+    })
+"""
+
+
+@swagger_auto_schema(method='put', manual_parameters=[seccion_id_param, estudiante_id_param])
+@api_view(['PUT'])
+def editar_estudiante_en_seccion_api(request, seccion_id, estudiante_id):
+    seccion_estudiante = get_object_or_404(SeccionEstudiante, seccion_id=seccion_id, estudiante_id=estudiante_id)
+
+    # Obtener las nuevas notas del request
+    nota1 = request.data.get('nota1')
+    nota2 = request.data.get('nota2')
+    nota3 = request.data.get('nota3')
+    nota4 = request.data.get('nota4')
+
+    try:
+        # Validar y asignar las notas si fueron proporcionadas
+        if nota1 is not None:
+            seccion_estudiante.nota1 = float(nota1)
+        if nota2 is not None:
+            seccion_estudiante.nota2 = float(nota2)
+        if nota3 is not None:
+            seccion_estudiante.nota3 = float(nota3)
+        if nota4 is not None:
+            seccion_estudiante.nota4 = float(nota4)
+
+        # Recalcular el promedio
+        seccion_estudiante.promedio = seccion_estudiante.calcular_promedio()
+
+        seccion_estudiante.save()
+
+        return Response({
+            'success': True,
+            'nombre': seccion_estudiante.estudiante.nombre,
+            'notas': {
+                'nota1': seccion_estudiante.nota1,
+                'nota2': seccion_estudiante.nota2,
+                'nota3': seccion_estudiante.nota3,
+                'nota4': seccion_estudiante.nota4,
+                'promedio': seccion_estudiante.promedio
+            }
+        }, status=status.HTTP_200_OK)
+
+    except ValueError:
+        return Response({'success': False, 'error': 'Las notas deben ser números válidos.'}, status=status.HTTP_400_BAD_REQUEST)
+
+@swagger_auto_schema(method='get', manual_parameters=[seccion_id_param, estudiante_id_param])
+@api_view(['GET'])
+def obtener_estudiante_en_seccion2(request, seccion_id, estudiante_id):
+    seccion_estudiante = get_object_or_404(SeccionEstudiante, seccion_id=seccion_id, estudiante_id=estudiante_id)
+
+    return Response({
+        'estudiante': {
+            'id': seccion_estudiante.estudiante.id,
+            'nombre': seccion_estudiante.estudiante.nombre
+        },
+        'notas': {
+            'nota1': seccion_estudiante.nota1,
+            'nota2': seccion_estudiante.nota2,
+            'nota3': seccion_estudiante.nota3,
+            'nota4': seccion_estudiante.nota4,
+            'promedio': seccion_estudiante.promedio
+        },
+        'estado': seccion_estudiante.estado
     })

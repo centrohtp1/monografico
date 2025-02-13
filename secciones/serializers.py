@@ -28,7 +28,10 @@ class SeccionEstudianteSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = SeccionEstudiante
-        fields = ['estudiante', 'nota', 'nota2', 'nota3', 'nota4', 'promedio']
+        fields = ['estudiante', 'nota', 'nota2', 'nota3', 'nota4', 'promedio','estado']
+        
+     def get_estado(self, obj):
+        return obj.estado  # Devuelve el estado calculado del modelo
 
     def update(self, instance, validated_data):
         instance.nota = validated_data.get('nota', instance.nota)

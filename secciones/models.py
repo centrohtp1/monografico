@@ -29,7 +29,7 @@ class SeccionEstudiante(models.Model):
 
     def calcular_promedio(self):
         notas = [self.nota, self.nota2, self.nota3, self.nota4]
-        notas_validas = [nota for nota in notas if nota is not None]
+        notas_validas = [notase for notase in notas if nota is not None]
         return sum(notas_validas) / len(notas_validas) if notas_validas else None
 
     def save(self, *args, **kwargs):

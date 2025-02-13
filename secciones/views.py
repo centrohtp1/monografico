@@ -232,15 +232,15 @@ def editar_estudiante_en_seccion_api(request, seccion_id, estudiante_id):
     seccion_estudiante = get_object_or_404(SeccionEstudiante, seccion_id=seccion_id, estudiante_id=estudiante_id)
 
     # Obtener las nuevas notas del request
-    nota1 = request.data.get('nota1')
+    nota = request.data.get('nota')
     nota2 = request.data.get('nota2')
     nota3 = request.data.get('nota3')
     nota4 = request.data.get('nota4')
 
     try:
         # Validar y asignar las notas si fueron proporcionadas
-        if nota1 is not None:
-            seccion_estudiante.nota1 = float(nota1)
+        if nota is not None:
+            seccion_estudiante.nota1 = float(nota)
         if nota2 is not None:
             seccion_estudiante.nota2 = float(nota2)
         if nota3 is not None:
@@ -257,7 +257,7 @@ def editar_estudiante_en_seccion_api(request, seccion_id, estudiante_id):
             'success': True,
             'nombre': seccion_estudiante.estudiante.nombre,
             'notas': {
-                'nota1': seccion_estudiante.nota1,
+                'nota': seccion_estudiante.nota,
                 'nota2': seccion_estudiante.nota2,
                 'nota3': seccion_estudiante.nota3,
                 'nota4': seccion_estudiante.nota4,
@@ -279,7 +279,7 @@ def obtener_estudiante_en_seccion2(request, seccion_id, estudiante_id):
             'nombre': seccion_estudiante.estudiante.nombre
         },
         'notas': {
-            'nota1': seccion_estudiante.nota1,
+            'nota': seccion_estudiante.nota,
             'nota2': seccion_estudiante.nota2,
             'nota3': seccion_estudiante.nota3,
             'nota4': seccion_estudiante.nota4,

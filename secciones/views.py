@@ -240,7 +240,7 @@ def editar_estudiante_en_seccion_api(request, seccion_id, estudiante_id):
     try:
         # Validar y asignar las notas si fueron proporcionadas
         if nota is not None:
-            seccion_estudiante.nota1 = float(nota)
+            seccion_estudiante.nota = float(nota)
         if nota2 is not None:
             seccion_estudiante.nota2 = float(nota2)
         if nota3 is not None:

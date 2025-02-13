@@ -28,7 +28,7 @@ class SeccionEstudiante(models.Model):
     promedio = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True, editable=False)
 
     def calcular_promedio(self):
-        notas = [self.nota1, self.nota2, self.nota3, self.nota4]
+        notas = [self.nota, self.nota2, self.nota3, self.nota4]
         notas_validas = [nota for nota in notas if nota is not None]
         return sum(notas_validas) / len(notas_validas) if notas_validas else None
 

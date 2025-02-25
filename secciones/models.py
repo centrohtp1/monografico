@@ -39,9 +39,9 @@ class SeccionEstudiante(models.Model):
     @property
     def estado(self):
         if self.promedio is not None:
-            if self.promedio >= 75:
+            if self.promedio >= 65:
                 return 'Promovido'
-            elif 55 <= self.promedio < 75:
+            elif 55 <= self.promedio < 65:
                 return 'Recuperación Pedagógica'
             else:
                 return 'Reprobado'
